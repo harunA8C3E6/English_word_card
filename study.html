@@ -1,0 +1,35 @@
+<html lang="ja">
+<head>
+    <meta charset="UTF-8" />
+    <title>単語学習</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+    <header class="header">
+        <h1 id="book-title">単語帳</h1>
+    </header>
+
+    <main class="container">
+        <div class="controls">
+            <button id="show-all-btn">すべて表示</button>
+            <button id="hide-all-btn">すべて隠す</button>
+        </div>
+    <div class="pagination">
+        <button class="prev-btn">← 前へ</button>
+        <span class="page-info"></span>
+        <button class="next-btn">次へ →</button>
+    </div>
+    <ul id="word-list"></ul>
+    <div class="pagination">
+        <button class="prev-btn">← 前へ</button>
+        <span class="page-info"></span>
+        <button class="next-btn">次へ →</button>
+    </div>
+    <button id="back-btn">← ホームに戻る</button>
+    </main>
+
+    <script src="./data.js"></script>
+    <script src="./study.js"></script>
+</body>
+</html>
