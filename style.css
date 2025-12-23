@@ -127,6 +127,7 @@ h2 {
 /* 単語一覧の一行 */
 .word-item {
     display: flex;
+    flex-direction: column;
     justify-content: space-between;
     padding: 10px;
     /* gap: 12px;  */
@@ -137,31 +138,41 @@ h2 {
     color: #eee;
 }
 
+.word-en-area {
+    display: block;
+    align-items: center;
+    width: 100%;
+}
+
 /* 単語一覧の英語 */
 .word-en {
-    width: 120px;
-    font-size: 1.1rem;
+    width: auto;
+    font-size: 1rem;
     margin-bottom: 4px;
+    white-space: nowrap;
 }
 
 /* 通し番号 */
 .word-index {
     width: 3ch;          /* 桁を揃える */
-    vertical-align: text-bottom;
-    text-align: right;
-    margin-right: 8px;
-    margin-top: 3px;
+    vertical-align: top;
+    /* text-align: right; */
+    /* margin-right: 8px; */
     color: #aaa;
-    font-size: 0.9rem;
+    font-size: 1rem;
     flex-shrink: 0;      /* 潰れ防止 */
 }
 
 .word-ja-area {
     position: relative;
     display: flex;
+    /* 線との余白 */
+    padding-top: 4px;
     flex: 1;              /* ← 残りの幅をすべて使う */
     min-height: 1lh;    /* ← 1行分の高さを確保 */
     margin-bottom: 4px;
+    /* 英語と日本語を分かつ線 */
+    border-top: 1px solid #555;
 }
 
 /* 日本語訳 */
@@ -227,3 +238,16 @@ h2 {
     background-color: #2a2a2a;
 }
 
+/* 音声ボタン */
+.speak-btn {
+    margin-left: auto;
+    margin-left: 6px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #ddd;
+}
+.speak-btn:hover {
+    color: #fff;
+}

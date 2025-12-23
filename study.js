@@ -42,9 +42,11 @@ function renderWords() {
         (currentPage - 1) * WORDS_PER_PAGE + index + 1;
 
         li.innerHTML = `
-            <div class="word-index">${serialNumber}.</div>
-            <div class="word-en">${word.en}</div>
-            <div>|　</div>
+            <div class="word-en-area">
+                <span class="word-index">${serialNumber}.</span>
+                <span class="word-en">${word.en}</span>
+                <button class="speak-btn" data-word="${word.en}">🔊</button>
+            </div>
             <div class="word-ja-area">
                 <span class="ja-text">${word.ja}</span>
                 <div class="sticky-note">タップして表示</div>
@@ -58,6 +60,24 @@ function renderWords() {
         }
 
         const sticky = li.querySelector(".sticky-note");
+
+        // 音声の設定
+        const speakBtn = li.querySelector(".speak-btn");
+
+        speakBtn.addEventListener("click", (e) => {
+            e.stopPropagation(); // 付箋クリックと干渉しないように
+
+            const text = speakBtn.dataset.word;
+            const uttr = new SpeechSynthesisUtterance(text);
+
+            uttr.lang = "en-GB";   // アメリカ英語
+            uttr.rate = 1.0;       // 速度（0.5〜1.5くらい）
+            uttr.pitch = 1.0;      // 音程
+
+            speechSynthesis.cancel(); // 連打対策
+            speechSynthesis.speak(uttr);
+        });
+
 
         // ★ 全体状態をここで統一
         if (globalMode === "show") {
