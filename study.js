@@ -70,7 +70,7 @@ function renderWords() {
             const text = speakBtn.dataset.word;
             const uttr = new SpeechSynthesisUtterance(text);
 
-            uttr.lang = "en-GB";   // アメリカ英語
+            uttr.lang = "en-US";   // アメリカ英語
             uttr.rate = 1.0;       // 速度（0.5〜1.5くらい）
             uttr.pitch = 1.0;      // 音程
 
