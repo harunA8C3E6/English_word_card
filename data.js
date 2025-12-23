@@ -4,19 +4,16 @@ const wordBooks = [
         id: "basic",
         title: "基本英単語",
         description: "中学レベルの基本単語",
-        count: 300
     },
     {
         id: "advanced",
         title: "発展英単語",
         description: "高校〜大学受験向け",
-        count: 800
     },
     {
-        id: "toeic",
-        title: "TOEIC頻出",
-        description: "TOEICによく出る単語",
-        count: 600
+        id: "math",
+        title: "数理科学用語集",
+        description: "数学でよく用いられる単語",
     }
 ];
 
@@ -43,7 +40,7 @@ const wordData = {
         // …何個でも追加
     ],
 
-    advanced: [
+    math: [
         { en: "achieve", ja: "達成する" },
         { en: "analyze", ja: "分析する" },
     ]

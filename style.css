@@ -144,6 +144,18 @@ h2 {
     margin-bottom: 4px;
 }
 
+/* 通し番号 */
+.word-index {
+    width: 3ch;          /* 桁を揃える */
+    vertical-align: text-bottom;
+    text-align: right;
+    margin-right: 8px;
+    margin-top: 3px;
+    color: #aaa;
+    font-size: 0.9rem;
+    flex-shrink: 0;      /* 潰れ防止 */
+}
+
 .word-ja-area {
     position: relative;
     display: flex;
@@ -208,3 +220,10 @@ h2 {
     opacity: 0;
     /* pointer-events: none; */
 }
+
+/* ハイライトの定義 */
+.word-item.highlight {
+    outline: 2px solid #f5e58a;
+    background-color: #2a2a2a;
+}
+
