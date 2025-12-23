@@ -44,7 +44,7 @@ function renderWords() {
         li.innerHTML = `
             <div class="word-index">${serialNumber}.</div>
             <div class="word-en">${word.en}</div>
-            <div>　|　</div>
+            <div>|　</div>
             <div class="word-ja-area">
                 <span class="ja-text">${word.ja}</span>
                 <div class="sticky-note">タップして表示</div>
