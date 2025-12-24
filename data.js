@@ -12,7 +12,7 @@ const wordBooks = [
     },
     {
         id: "math",
-        title: "数理科学用語集",
+        title: "数理科学用語",
         description: "数学でよく用いられる単語",
     }
 ];
@@ -30,8 +30,12 @@ const wordData = {
     ],
 
     system: [
-        { en: "follow", ja: "～（の後）に続く、〈指示・方針など〉に従う" },
-        { en: "consider", ja: "～を考慮する" },
+        { en: "follow", ja: "～（の後）に続く、〈指示・方針など〉に従う", 
+            example: { en: "follow her advice", ja: "彼女の助言に従う"}
+        },
+        { en: "consider", ja: "～を考慮する", 
+            example: { en: "consider the problem seriously", ja: "真剣にその問題を考える"}
+        },
         { en: "increase", ja: "増える、～を増やす" },
         { en: "expect", ja: "～を予期する" },
         { en: "decide", ja: "～することを決意する" },

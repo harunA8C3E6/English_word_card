@@ -1,12 +1,14 @@
-const STORAGE_KEY = "word_list_visibility"; 
-// 値: "show" | "hide"
+const STORAGE_KEY = "word_list_visibility";
 
 let targetSerialNumber = null;
+let currentExampleText = "";
+let currentUtterance = null;
 
-document.getElementById("back-btn").addEventListener("click", () => {
+document.getElementById("back-btn").onclick = () => {
     location.href = "index.html";
-});
+};
 
+// ===== URLパラメータ =====
 const params = new URLSearchParams(location.search);
 const bookId = params.get("book");
 const book = wordBookMap[bookId];
@@ -14,38 +16,84 @@ const book = wordBookMap[bookId];
 document.getElementById("book-title").textContent =
     book ? book.title : "単語帳";
 
-// ===== ここから単語表示 =====
-
+// ===== データ =====
 const words = wordData[bookId] ?? [];
 const WORDS_PER_PAGE = 10;
 let currentPage = 1;
 
 const listEl = document.getElementById("word-list");
 
+// ===== モーダル（1回だけ取得） =====
+const modal = document.getElementById("example-modal");
+const exampleEn = modal.querySelector(".example-en");
+const exampleJa = modal.querySelector(".example-ja");
+const toggleJaBtn = document.getElementById("toggle-ja");
+const closeModalBtn = document.getElementById("close-modal");
+const playAudioBtn = document.getElementById("play-audio");
+
+let jaVisible = false;
+
+// ===== 音声再生 =====
+function speak(text) {
+    if (!text) return;
+    speechSynthesis.cancel();
+
+    const uttr = new SpeechSynthesisUtterance(text);
+    uttr.lang = "en-US";
+    uttr.rate = 1.0;
+    uttr.pitch = 1.0;
+
+    currentUtterance = uttr;
+    speechSynthesis.speak(uttr);
+}
+
+// ===== モーダル制御 =====
+function closeModal() {
+    modal.classList.add("modal-hidden");
+    speechSynthesis.cancel();
+}
+
+toggleJaBtn.onclick = () => {
+    jaVisible = !jaVisible;
+    exampleJa.classList.toggle("modal-hidden");
+    toggleJaBtn.textContent = jaVisible
+        ? "日本語を隠す"
+        : "日本語を表示";
+};
+
+closeModalBtn.onclick = closeModal;
+
+modal.addEventListener("click", closeModal);
+modal.querySelector(".modal-content").addEventListener("click", e => {
+    e.stopPropagation();
+});
+
+playAudioBtn.onclick = () => {
+    speak(currentExampleText);
+};
+
+// ===== 単語描画 =====
 function renderWords() {
     listEl.innerHTML = "";
 
     const start = (currentPage - 1) * WORDS_PER_PAGE;
-    const end = start + WORDS_PER_PAGE;
-    const pageWords = words.slice(start, end);
+    const pageWords = words.slice(start, start + WORDS_PER_PAGE);
 
     let highlightElement = null;
-
-    const globalMode = localStorage.getItem(STORAGE_KEY); 
-    // "show" | "hide" | null
+    const globalMode = localStorage.getItem(STORAGE_KEY);
 
     pageWords.forEach((word, index) => {
         const li = document.createElement("li");
         li.className = "word-item";
 
-        const serialNumber =
-        (currentPage - 1) * WORDS_PER_PAGE + index + 1;
+        const serialNumber = start + index + 1;
 
         li.innerHTML = `
             <div class="word-en-area">
                 <span class="word-index">${serialNumber}.</span>
                 <span class="word-en">${word.en}</span>
-                <button class="speak-btn" data-word="${word.en}">🔊</button>
+                <button class="speak-btn button-text" data-word="${word.en}">🔊 再生</button>
+                <button class="example-btn button-text">例文</button>
             </div>
             <div class="word-ja-area">
                 <span class="ja-text">${word.ja}</span>
@@ -53,7 +101,6 @@ function renderWords() {
             </div>
         `;
 
-        // このif文はハイライト
         if (serialNumber === targetSerialNumber) {
             li.classList.add("highlight");
             highlightElement = li;
@@ -61,56 +108,56 @@ function renderWords() {
 
         const sticky = li.querySelector(".sticky-note");
 
-        // 音声の設定
-        const speakBtn = li.querySelector(".speak-btn");
-
-        speakBtn.addEventListener("click", (e) => {
-            e.stopPropagation(); // 付箋クリックと干渉しないように
-
-            const text = speakBtn.dataset.word;
-            const uttr = new SpeechSynthesisUtterance(text);
-
-            uttr.lang = "en-US";   // アメリカ英語
-            uttr.rate = 1.0;       // 速度（0.5〜1.5くらい）
-            uttr.pitch = 1.0;      // 音程
-
-            speechSynthesis.cancel(); // 連打対策
-            speechSynthesis.speak(uttr);
-        });
-
-
-        // ★ 全体状態をここで統一
         if (globalMode === "show") {
             sticky.classList.add("hidden");
-            } else {
+        } else {
             sticky.classList.remove("hidden");
         }
 
-        // 個別タップはその場だけ上書き
-        sticky.addEventListener("click", () => {
+        sticky.onclick = () => {
             sticky.classList.toggle("hidden");
-        });
+        };
 
-    listEl.appendChild(li);
+        // 単語音声
+        li.querySelector(".speak-btn").onclick = (e) => {
+            e.stopPropagation();
+            speak(word.en);
+        };
+
+        // 例文ボタン
+        li.querySelector(".example-btn").onclick = () => {
+            if (!word.example) {
+                exampleEn.textContent = "例文はありません";
+                exampleJa.textContent = "";
+                toggleJaBtn.classList.add("modal-hidden");
+                currentExampleText = "";
+            } else {
+                exampleEn.textContent = word.example.en;
+                exampleJa.textContent = word.example.ja;
+                exampleJa.classList.add("modal-hidden");
+                toggleJaBtn.classList.remove("modal-hidden");
+                toggleJaBtn.textContent = "日本語を表示";
+                jaVisible = false;
+
+                currentExampleText = word.example.en;
+            }
+
+            modal.classList.remove("modal-hidden");
+        };
+
+        listEl.appendChild(li);
     });
 
     const totalPages = Math.ceil(words.length / WORDS_PER_PAGE);
     updatePageInfo(currentPage, totalPages);
 
-    // ★ 描画後にスクロール
     if (highlightElement) {
-        highlightElement.scrollIntoView({
-            behavior: "smooth",
-            block: "center"
-        });
-
-        // 次回描画では解除
+        highlightElement.scrollIntoView({ behavior: "smooth", block: "center" });
         targetSerialNumber = null;
     }
 }
 
-
-// ボタン操作
+// ===== ページ制御 =====
 const prevButtons = document.querySelectorAll(".prev-btn");
 const nextButtons = document.querySelectorAll(".next-btn");
 const pageInfoEls = document.querySelectorAll(".page-info");
@@ -125,7 +172,7 @@ prevButtons.forEach(btn => {
     btn.onclick = () => {
         if (currentPage > 1) {
             currentPage--;
-        renderWords();
+            renderWords();
         }
     };
 });
@@ -135,14 +182,12 @@ nextButtons.forEach(btn => {
         const totalPages = Math.ceil(words.length / WORDS_PER_PAGE);
         if (currentPage < totalPages) {
             currentPage++;
-        renderWords();
+            renderWords();
         }
     };
 });
 
-// 初期表示
-renderWords();
-
+// ===== 付箋「すべて表示/非表示」切替 =====
 document.getElementById("show-all-btn").onclick = () => {
     localStorage.setItem(STORAGE_KEY, "show");
     renderWords();
@@ -153,25 +198,67 @@ document.getElementById("hide-all-btn").onclick = () => {
     renderWords();
 };
 
-// 番号検索の導入
+// ===== 単語検索の導入 =====
+const wordSearchInput = document.getElementById("word-search-input");
+const wordSearchBtn = document.getElementById("word-search-btn");
+
+wordSearchBtn.onclick = () => {
+    const keyword = wordSearchInput.value.trim().toLowerCase();
+    if (!keyword) return;
+    
+    // 単語を検索（英語 or 日本語）
+    const index = words.findIndex(word =>
+        word.en.toLowerCase().includes(keyword) ||
+        word.ja.includes(keyword)
+    );
+    
+    if (index === -1) {
+        alert("該当する単語が見つかりませんでした");
+        return;
+    }
+    
+    // 通し番号（1始まり）
+    const serialNumber = index + 1;
+    
+    // ページ計算
+    const targetPage = Math.ceil(serialNumber / WORDS_PER_PAGE);
+    
+    currentPage = targetPage;
+    
+    // ハイライトする単語番号の保存
+    targetSerialNumber = serialNumber;
+    
+    renderWords();
+    
+    wordSearchInput.value = "";
+};
+
+// 検索をエンターキーでも検索できるようにする
+wordSearchInput.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+        wordSearchBtn.click();
+    }
+});
+
+// ===== 番号検索の導入 =====
 const jumpInput = document.getElementById("jump-input");
 const jumpBtn = document.getElementById("jump-btn");
 
 jumpBtn.onclick = () => {
     const number = Number(jumpInput.value);
-
+    
     // 入力チェック
     if (!number || number < 1 || number > words.length) {
         alert("有効な番号を入力してください");
         return;
     }
-
+    
     // ハイライトする単語番号の保存
     targetSerialNumber = number;
-
+    
     currentPage = Math.ceil(number / WORDS_PER_PAGE);
     renderWords();
-
+    
     // 任意：入力欄を空にする
     jumpInput.value = "";
 };
@@ -183,45 +270,5 @@ jumpInput.addEventListener("keydown", (e) => {
     }
 });
 
-// 単語検索の導入
-const wordSearchInput = document.getElementById("word-search-input");
-const wordSearchBtn = document.getElementById("word-search-btn");
-
-wordSearchBtn.onclick = () => {
-    const keyword = wordSearchInput.value.trim().toLowerCase();
-    if (!keyword) return;
-
-    // 単語を検索（英語 or 日本語）
-    const index = words.findIndex(word =>
-        word.en.toLowerCase().includes(keyword) ||
-        word.ja.includes(keyword)
-    );
-
-    if (index === -1) {
-        alert("該当する単語が見つかりませんでした");
-        return;
-    }
-
-    // 通し番号（1始まり）
-    const serialNumber = index + 1;
-
-    // ページ計算
-    const targetPage = Math.ceil(serialNumber / WORDS_PER_PAGE);
-
-    currentPage = targetPage;
-
-    // ハイライトする単語番号の保存
-    targetSerialNumber = serialNumber;
-
-    renderWords();
-
-    wordSearchInput.value = "";
-};
-
-// 検索をエンターキーでも検索できるようにする
-wordSearchInput.addEventListener("keydown", e => {
-    if (e.key === "Enter") {
-        wordSearchBtn.click();
-    }
-});
-
+// ===== 初期表示 =====
+renderWords();

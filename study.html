@@ -10,6 +10,17 @@
         <h1 id="book-title">単語帳</h1>
     </header>
 
+    <!-- 例文ポップアップ -->
+    <div id="example-modal" class="modal modal-hidden">
+        <div class="modal-content">
+            <button id="close-modal">×</button>
+            <p class="example-en"></p>
+            <button id="toggle-ja" class="button-text">日本語を表示</button>
+            <button id="play-audio" class="button-text">🔊 再生</button>
+        <p class="example-ja hidden"></p>
+        </div>
+    </div>
+
     <main class="container">
         <div class="controls">
             <input
