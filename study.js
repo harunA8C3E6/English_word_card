@@ -8,36 +8,84 @@ document.getElementById("back-btn").onclick = () => {
     location.href = "index.html";
 };
 
+function loadJSON(key, defaultValue) {
+    try {
+        return JSON.parse(localStorage.getItem(key)) ?? defaultValue;
+    } catch {
+        return defaultValue;
+    }
+}
+
+let wordTags = loadJSON("wordTags", {});
+let tags = loadJSON("tags", {});
+
+
+
+// ===== タグ設定モーダル =====
+const tagModal = document.getElementById("tag-modal");
+const tagModalTitle = document.getElementById("tag-modal-title");
+const tagCheckboxArea = document.getElementById("tag-checkbox-area");
+const tagSaveBtn = document.getElementById("tag-save-btn");
+const tagCloseBtn = document.getElementById("tag-close-btn");
+
+let currentWordId = null;
+
 // ===== URLパラメータ =====
 const params = new URLSearchParams(location.search);
 const bookId = params.get("book");
 const book = wordBookMap[bookId];
-const tagId  = params.get("tag"); //タグのために追加
+const tagId = params.get("tag"); //タグのために追加
 
 document.getElementById("book-title").textContent =
-    book ? book.title : "単語帳";
+book ? book.title : "単語帳";
 
 // ===== 表示対象 words を決定 =====
+// お試し↓
 let words = [];
 
 if (tagId) {
+    // タグページの場合
     Object.values(wordData).forEach(bookWords => {
         bookWords.forEach(word => {
-            const tags = wordTags[word.id] ?? [];
-            if (tags.includes(tagId)) {
+            const tagsOfWord = wordTags[word.id] ?? [];
+            if (tagsOfWord.includes(tagId)) {
                 words.push(word);
             }
         });
     });
 
-    const tagName = tags[tagId]?.name ?? "タグ";
+    const tagName = tags[tagId]?.name ?? tagId;
     document.getElementById("book-title").textContent = `#${tagName}`;
-} else {
+
+} else if (bookId) {
+    // 単語帳ページの場合
     words = wordData[bookId] ?? [];
+
     const book = wordBookMap[bookId];
     document.getElementById("book-title").textContent =
         book ? book.title : "単語帳";
 }
+// お試し↑
+// let words = [];
+
+// if (tagId) {
+//     Object.values(wordData).forEach(bookWords => {
+//         bookWords.forEach(word => {
+//             const tags = wordTags[word.id] ?? [];
+//             if (tags.includes(tagId)) {
+//                 words.push(word);
+//             }
+//         });
+//     });
+
+//     const tagName = tags[tagId]?.name ?? "タグ";
+//     document.getElementById("book-title").textContent = `#${tagName}`;
+// } else {
+//     words = wordData[bookId] ?? [];
+//     const book = wordBookMap[bookId];
+//     document.getElementById("book-title").textContent =
+//         book ? book.title : "単語帳";
+// }
 
 
 // ===== データ =====
@@ -118,14 +166,10 @@ function renderWords() {
                 <span class="word-en">${word.en}</span>
                 <button class="speak-btn button-text" data-word="${word.en}">🔊 再生</button>
                 <button class="example-btn button-text">例文</button>
-
-                <div class="tag-box">
-                    <label><input type="checkbox" value="important"> 重要</label>
-                    <label><input type="checkbox" value="weak"> 苦手</label>
-                    <label><input type="checkbox" value="verb"> 動詞</label>
-                </div>
-
-
+                
+                <button class="tag-edit-btn button-text">
+                タグ設定
+                </button>
             </div>
             <div class="word-ja-area">
                 <span class="ja-text">${word.ja}</span>
@@ -173,11 +217,15 @@ function renderWords() {
 
                 currentExampleText = word.example.en;
             }
-
+            
             modal.classList.remove("modal-hidden");
         };
-
+        
         listEl.appendChild(li);
+
+        li.querySelector(".tag-edit-btn").onclick = () => {
+            openTagModal(word);
+        };
     });
 
     const totalPages = Math.ceil(words.length / WORDS_PER_PAGE);
@@ -189,20 +237,44 @@ function renderWords() {
     }
 
     // タグ関連
-    const select = li.querySelector(".tag-select");
+    // const select = li.querySelector(".tag-select");
 
-    select.onchange = () => {
-        const tag = select.value;
-        if (!tag) return;
+    // select.onchange = () => {
+    //     const tag = select.value;
+    //     if (!tag) return;
 
-        if (!wordTags[word.id]) wordTags[word.id] = [];
-        if (!wordTags[word.id].includes(tag)) {
-            wordTags[word.id].push(tag);
-            saveWordTags();
-        }
-    };
+    //     if (!wordTags[word.id]) wordTags[word.id] = [];
+    //     if (!wordTags[word.id].includes(tag)) {
+    //         wordTags[word.id].push(tag);
+    //         saveWordTags();
+    //     }
+    // };
 
     // タグ関連終了
+
+    // タグ設定ボタン
+
+    function openTagModal(word) {
+        currentWordId = word.id;
+
+    tagModalTitle.textContent = `${word.en} のタグ設定`;
+    tagCheckboxArea.innerHTML = "";
+
+    const currentTags = wordTags[word.id] ?? [];
+
+    Object.entries(tags).forEach(([tagId, tag]) => {
+        const checked = currentTags.includes(tagId) ? "checked" : "";
+
+        tagCheckboxArea.innerHTML += `
+            <label>
+                <input type="checkbox" value="${tagId}" ${checked}>
+                ${tag.name}
+            </label>
+        `;
+    });
+
+    tagModal.classList.remove("modal-hidden");
+    }
 
 }
 
@@ -327,3 +399,34 @@ jumpInput.addEventListener("keydown", (e) => {
 
 // ===== 初期表示 =====
 renderWords();
+
+// ===== タグの保存 =====
+tagSaveBtn.onclick = () => {
+    const selected = [];
+
+    tagCheckboxArea
+        .querySelectorAll("input[type='checkbox']:checked")
+        .forEach(cb => {
+            selected.push(cb.value);
+        });
+
+    wordTags[currentWordId] = selected;
+    localStorage.setItem("wordTags", JSON.stringify(wordTags));
+
+    closeTagModal();
+};
+
+function closeTagModal() {
+    tagModal.classList.add("modal-hidden");
+    currentWordId = null;
+}
+
+tagCloseBtn.onclick = closeTagModal;
+
+tagModal.onclick = closeTagModal;
+tagModal.querySelector(".modal-tag-content").onclick = e => {
+    e.stopPropagation();
+};
+
+// タグの初期化ボタン
+// document.getElementById(tagRestart).onclick = loadJSON;

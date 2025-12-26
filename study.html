@@ -20,6 +20,33 @@
         <p class="example-ja hidden"></p>
         </div>
     </div>
+    <!-- タグ設定モーダル -->
+    <div id="tag-modal" class="modal modal-hidden">
+        <div class="modal-tag-content">
+            <h3 id="tag-modal-title"></h3>
+
+            <!-- ★ ここをスクロールさせる -->
+            <div class="modal-body" id="tag-checkbox-area"></div>
+
+            <div class="modal-buttons">
+                <button id="tag-save-btn">保存</button>
+                <button id="tag-close-btn">閉じる</button>
+            </div>
+        </div>
+    </div>
+    <!-- <div id="tag-modal" class="modal modal-hidden">
+        <div class="modal-content">
+            <h3 id="tag-modal-title"></h3>
+
+            <div id="tag-checkbox-area"></div>
+
+            <div class="modal-buttons">
+                <button id="tag-save-btn">保存</button>
+                <button id="tag-close-btn">閉じる</button>
+            </div>
+        </div>
+    </div> -->
+
 
     <main class="container">
         <div class="controls">
@@ -56,6 +83,7 @@
         <button class="next-btn">次へ →</button>
     </div>
     <button id="back-btn">← ホームに戻る</button>
+    <!-- <button id="tagRestart">タグの初期化</button> -->
     </main>
 
     <script src="./data.js"></script>

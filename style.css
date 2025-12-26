@@ -85,6 +85,7 @@ h2 {
     padding-right: 5px;
     padding-bottom: 3px;
     border-radius: 8px;
+    cursor: pointer;
     user-select: none;
 }
 
@@ -96,7 +97,8 @@ h2 {
     padding-left: 5px;
     padding-right: 5px;
     padding-bottom: 3px;
-    border-radius: 8px;
+    /* border-radius: 8px; */
+    cursor: pointer;
     user-select: none;
 }
 
@@ -108,7 +110,8 @@ h2 {
     padding-left: 5px;
     padding-right: 5px;
     padding-bottom: 3px;
-    border-radius: 8px;
+    /* border-radius: 8px; */
+    cursor: pointer;
     user-select: none;
 }
 
@@ -122,6 +125,7 @@ h2 {
     padding-right: 8px;
     color: #DDDDDD;
     border-radius: 8px;
+    cursor: pointer;
     user-select: none;
 }
 
@@ -264,6 +268,21 @@ h2 {
     position: relative;
 }
 
+/* タグ設定モーダルの中身 */
+.modal-tag-content {
+    background: #1e1e1e;
+    padding: 16px;
+    border-radius: 8px;
+
+    width: 90%;
+    max-width: 320px;
+
+    max-height: 80vh;        /* ★ 画面の80%まで */
+    display: flex;
+    flex-direction: column;
+}
+
+
 /* 閉じるボタン */
 #close-modal {
     position: absolute;
@@ -305,12 +324,13 @@ h2 {
 
 .tag-link {
     display: flex;
-    justify-content: space-between;
+    align-items: center;
     padding: 12px;
     background: #1e1e1e;
     border-radius: 6px;
     text-decoration: none;
     color: #eee;
+    gap: 10px;
 }
 
 .tag-link:hover {
@@ -318,12 +338,19 @@ h2 {
 }
 
 .tag-name {
+    flex: 1;                 /* ← 残り全部使う */
     font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 99%;
 }
 
 .tag-count {
     font-size: 0.85rem;
     opacity: 0.7;
+    flex-shrink: 0;          /* ← 絶対に縮めない */
+    white-space: nowrap;
 }
 
 /* タグページに行くためのボタン */
@@ -337,5 +364,80 @@ h2 {
     border-radius: 8px;
     margin-left: 16px;
     font-size: 1.1rem;
+    cursor: pointer;
     user-select: none;
+}
+
+/* タグモーダル関連 */
+#tag-checkbox-area label {
+    display: block;
+    margin: 6px 0;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.modal-body {
+    overflow-y: auto;        /* 縦スクロール */
+    flex: 1;                 /* 残りの高さを全部使う */
+    margin: 8px 0;
+}
+
+/* タグを検察 */
+.tag-rename-button {
+    padding: 10px 15px;
+    background: #2a2a2a;
+    color: #eee;
+    border: 1px solid #444;
+    border-radius: 4px;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* タグ名の編集テキストボックス */
+.tag-rename-textbox {
+    width: auto;
+    padding: 8px 10px;
+    border: 1px solid #8b8484;
+    border-radius: 3px;
+    background: #9d9d9d;
+    color: #222;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+/* タグ名編集画面のタグIDのテキスト */
+.tag-name {
+    display: inline-block;
+    width: 60px;
+}
+
+#tag-save-btn {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+    color: #DDDDDD;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-bottom: 3px;
+    /* border-radius: 8px; */
+    user-select: none;
+}
+
+#tag-close-btn {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+    color: #DDDDDD;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-bottom: 3px;
+    /* border-radius: 8px; */
+    user-select: none;
+}
+
+.button-to-tags:hover {
+    background-color: #2a2a2a;
+    transform: translateY(-2px);
 }

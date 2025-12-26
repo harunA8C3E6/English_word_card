@@ -12,8 +12,8 @@ Object.entries(tags).forEach(([tagId, tag]) => {
     li.className = "tag-item";
 
     li.innerHTML = `
-        <span>#${tagId}</span>
-        <input type="text" value="${tag.name}" data-tag="${tagId}">
+        <span class="tag-name">#${tagId}</span>
+        <input type="text" class="tag-rename-textbox" value="${tag.name}" data-tag="${tagId}">
     `;
 
     const input = li.querySelector("input");
