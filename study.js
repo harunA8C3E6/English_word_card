@@ -12,12 +12,36 @@ document.getElementById("back-btn").onclick = () => {
 const params = new URLSearchParams(location.search);
 const bookId = params.get("book");
 const book = wordBookMap[bookId];
+const tagId  = params.get("tag"); //タグのために追加
 
 document.getElementById("book-title").textContent =
     book ? book.title : "単語帳";
 
+// ===== 表示対象 words を決定 =====
+let words = [];
+
+if (tagId) {
+    Object.values(wordData).forEach(bookWords => {
+        bookWords.forEach(word => {
+            const tags = wordTags[word.id] ?? [];
+            if (tags.includes(tagId)) {
+                words.push(word);
+            }
+        });
+    });
+
+    const tagName = tags[tagId]?.name ?? "タグ";
+    document.getElementById("book-title").textContent = `#${tagName}`;
+} else {
+    words = wordData[bookId] ?? [];
+    const book = wordBookMap[bookId];
+    document.getElementById("book-title").textContent =
+        book ? book.title : "単語帳";
+}
+
+
 // ===== データ =====
-const words = wordData[bookId] ?? [];
+// const words = wordData[bookId] ?? [];
 const WORDS_PER_PAGE = 10;
 let currentPage = 1;
 
@@ -94,6 +118,14 @@ function renderWords() {
                 <span class="word-en">${word.en}</span>
                 <button class="speak-btn button-text" data-word="${word.en}">🔊 再生</button>
                 <button class="example-btn button-text">例文</button>
+
+                <div class="tag-box">
+                    <label><input type="checkbox" value="important"> 重要</label>
+                    <label><input type="checkbox" value="weak"> 苦手</label>
+                    <label><input type="checkbox" value="verb"> 動詞</label>
+                </div>
+
+
             </div>
             <div class="word-ja-area">
                 <span class="ja-text">${word.ja}</span>
@@ -155,7 +187,30 @@ function renderWords() {
         highlightElement.scrollIntoView({ behavior: "smooth", block: "center" });
         targetSerialNumber = null;
     }
+
+    // タグ関連
+    const select = li.querySelector(".tag-select");
+
+    select.onchange = () => {
+        const tag = select.value;
+        if (!tag) return;
+
+        if (!wordTags[word.id]) wordTags[word.id] = [];
+        if (!wordTags[word.id].includes(tag)) {
+            wordTags[word.id].push(tag);
+            saveWordTags();
+        }
+    };
+
+    // タグ関連終了
+
 }
+
+// タグ関連
+function saveWordTags() {
+    localStorage.setItem("wordTags", JSON.stringify(wordTags));
+}
+// タグ関連終了
 
 // ===== ページ制御 =====
 const prevButtons = document.querySelectorAll(".prev-btn");

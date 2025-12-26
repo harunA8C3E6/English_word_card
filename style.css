@@ -291,3 +291,51 @@ h2 {
 .modal-hidden {
     display: none;
 }
+
+
+
+.tag-list {
+    list-style: none;
+    padding: 0;
+}
+
+.tag-item {
+    margin-bottom: 12px;
+}
+
+.tag-link {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px;
+    background: #1e1e1e;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #eee;
+}
+
+.tag-link:hover {
+    background: #2a2a2a;
+}
+
+.tag-name {
+    font-size: 1rem;
+}
+
+.tag-count {
+    font-size: 0.85rem;
+    opacity: 0.7;
+}
+
+/* タグページに行くためのボタン */
+.button-to-tags {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+    color: #DDDDDD;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-bottom: 3px;
+    border-radius: 8px;
+    margin-left: 16px;
+    font-size: 1.1rem;
+    user-select: none;
+}
