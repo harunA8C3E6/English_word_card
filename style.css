@@ -12,6 +12,7 @@ body{
     padding: 16px;
     text-align: center;
     border-bottom: 1px solid #333;
+    position: relative;
 }
 
 /* メイン */
@@ -176,8 +177,9 @@ h2 {
     /* 線との余白 */
     padding-top: 4px;
     flex: 1;              /* ← 残りの幅をすべて使う */
-    min-height: 1lh;    /* ← 1行分の高さを確保 */
-    margin-bottom: 4px;
+    /* ↓1行分の高さを確保↓ */
+    /* min-height: 1lh; */
+    /* margin-bottom: px; */
     /* 英語と日本語を分かつ線 */
     border-top: 1px solid #555;
 }
@@ -185,9 +187,43 @@ h2 {
 /* 日本語訳 */
 .ja-text {
     display: inline-block;
-    height: 1lh;
-    margin-bottom: 4px;
+    /* height: 1lh; */
+    /* margin-bottom: 4px; */
 }
+
+.ja-line {
+    display: flex;
+    line-height: 1.4;
+    margin: 5px;
+}
+
+/* 各英単語の日本語の品詞部分 */
+.pos-tag[data-pos="動"] { background: #3a6ea5; }
+.pos-tag[data-pos="名"] { background: #6a9f58; }
+.pos-tag[data-pos="形"] { background: #a56e3a; }
+.pos-tag {
+    display: inline-block;
+    min-width: 2.2em;
+    text-align: center;
+
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    margin-right: 6px;
+
+    border: 1px solid #333;
+    border-radius: 4px;
+    /* background: #444; */
+    color: #eee;
+
+    flex-shrink: 0;
+}
+
+/* 各英単語の日本語の意味自体 */
+.meaning {
+    line-height: 1.4;
+    word-break: break-word;
+}
+
 
 /* 付箋 */
 .sticky-note {
@@ -212,6 +248,19 @@ h2 {
 
     user-select: none; /* 「タップして表示」をカーソル選択しなくなる工夫 */
 }
+
+/* 品詞ごとのチェックボックス */
+#pos-filter {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+#pos-filter label {
+    font-size: 0.85rem;
+    cursor: pointer;
+    user-select: none;
+}
+
 
 .controls {
     display: flex;
@@ -440,4 +489,25 @@ h2 {
 .button-to-tags:hover {
     background-color: #2a2a2a;
     transform: translateY(-2px);
+}
+
+/* 1ページ前に戻るボタン */
+.prev-page-btn {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+
+    background: #1e1e1e;
+    border: 1px solid #333;
+    color: #ddd;
+
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+
+    font-size: 0.85rem;
+}
+
+.prev-page-btn:hover {
+    background: #2a2a2a;
 }

@@ -4,9 +4,70 @@ let targetSerialNumber = null;
 let currentExampleText = "";
 let currentUtterance = null;
 
+// 品詞チェックボックス関連
+const POS_FILTER_KEY = "posFilter";
+const ALL_POS = ["動", "名", "形", "副"];
+
+let activePosSet = new Set(ALL_POS);
+
+function loadPosFilter() {
+    try {
+        const saved = JSON.parse(localStorage.getItem(POS_FILTER_KEY));
+        if (Array.isArray(saved) && saved.length > 0) {
+            activePosSet = new Set(saved);
+        }
+    } catch {
+        activePosSet = new Set(ALL_POS);
+    }
+}
+loadPosFilter();
+
+document.querySelectorAll("#pos-filter input").forEach(cb => {
+    cb.checked = activePosSet.has(cb.value);
+});
+
+document.querySelectorAll("#pos-filter input").forEach(cb => {
+    cb.addEventListener("change", () => {
+        activePosSet.clear();
+
+        document.querySelectorAll("#pos-filter input:checked")
+            .forEach(el => activePosSet.add(el.value));
+
+        // 全解除防止
+        if (activePosSet.size === 0) {
+            cb.checked = true;
+            activePosSet.add(cb.value);
+        }
+
+        // 保存
+        localStorage.setItem(
+            POS_FILTER_KEY,
+            JSON.stringify([...activePosSet])
+        );
+
+        currentPage = 1;
+        renderWords();
+    });
+});
+
+
+// ===== 「ホーム/タグ一覧」に戻るボタン =====
 document.getElementById("back-btn").onclick = () => {
-    location.href = "index.html";
+    const params = new URLSearchParams(location.search);
+    if (params.has("tag")) {
+        // タグ学習ページから来た場合
+        location.href = "tags.html";
+    } else {
+        // 通常の単語帳から来た場合
+        location.href = "index.html";
+    }
 };
+const backBtn = document.getElementById("back-btn");
+const buttonParams = new URLSearchParams(location.search);
+backBtn.textContent = buttonParams.has("tag")
+    ? "← タグ一覧に戻る"
+    : "← ホームに戻る";
+// ===== 終了 =====
 
 function loadJSON(key, defaultValue) {
     try {
@@ -144,12 +205,14 @@ playAudioBtn.onclick = () => {
     speak(currentExampleText);
 };
 
+localStorage.setItem("posFilter", JSON.stringify([...activePosSet]));
 // ===== 単語描画 =====
 function renderWords() {
     listEl.innerHTML = "";
 
     const start = (currentPage - 1) * WORDS_PER_PAGE;
-    const pageWords = words.slice(start, start + WORDS_PER_PAGE);
+    const filteredWords = words.filter(matchPosFilter);
+    const pageWords = filteredWords.slice(start, start + WORDS_PER_PAGE);
 
     let highlightElement = null;
     const globalMode = localStorage.getItem(STORAGE_KEY);
@@ -160,6 +223,27 @@ function renderWords() {
 
         const serialNumber = start + index + 1;
 
+        // ===== 日本語訳の作成 =====
+        function renderJapanese(word) {
+            // 旧データ（文字列）にも対応
+            if (typeof word.ja === "string") {
+                return `<div class="ja-line">${word.ja}</div>`;
+            }
+
+            // 新データ（配列）
+            if (Array.isArray(word.ja)) {
+                return word.ja.map(item => `
+                    <div class="ja-line">
+                        <span class="pos-tag" data-pos="${item.pos}">${item.pos}</span>
+                        <span class="meaning">${item.meaning}</span>
+                    </div>
+                `).join("");
+            }
+
+            return "";
+        }
+
+        // ===== 単語HTMLの生成 =====
         li.innerHTML = `
             <div class="word-en-area">
                 <span class="word-index">${serialNumber}.</span>
@@ -172,7 +256,7 @@ function renderWords() {
                 </button>
             </div>
             <div class="word-ja-area">
-                <span class="ja-text">${word.ja}</span>
+                <div class="ja-text">${renderJapanese(word)}</div>
                 <div class="sticky-note">タップして表示</div>
             </div>
         `;
@@ -183,6 +267,13 @@ function renderWords() {
         }
 
         const sticky = li.querySelector(".sticky-note");
+        const jaText = li.querySelector(".ja-text");
+        const jaArea = li.querySelector(".word-ja-area");
+        // 日本語の高さを取得
+        const textHeight = jaText.offsetHeight;
+        // 高さの動機
+        // sticky.style.height = textHeight + "px";
+        jaArea.style.height = textHeight + "px";
 
         if (globalMode === "show") {
             sticky.classList.add("hidden");
@@ -228,7 +319,7 @@ function renderWords() {
         };
     });
 
-    const totalPages = Math.ceil(words.length / WORDS_PER_PAGE);
+    const totalPages = Math.ceil(filteredWords.length / WORDS_PER_PAGE);
     updatePageInfo(currentPage, totalPages);
 
     if (highlightElement) {
@@ -276,6 +367,23 @@ function renderWords() {
     tagModal.classList.remove("modal-hidden");
     }
 
+    // 品詞チェックボックス関連
+    function matchPosFilter(word) {
+        // 品詞データがない単語は常に表示
+        if (!Array.isArray(word.ja)) return true;
+
+        // 単語が持つ品詞一覧
+        const wordPosList = word.ja.map(item => item.pos);
+
+        // 選択中の品詞と1つでも一致すればOK
+        return wordPosList.some(pos => activePosSet.has(pos));
+    }
+    
+    if (activePosSet.size === 0) {
+        cb.checked = true;
+        activePosSet.add(cb.value);
+        return;
+    }
 }
 
 // タグ関連
@@ -430,3 +538,29 @@ tagModal.querySelector(".modal-tag-content").onclick = e => {
 
 // タグの初期化ボタン
 // document.getElementById(tagRestart).onclick = loadJSON;
+
+// ===== 1つ前のページに戻るボタン =====
+const prevBtn = document.getElementById("prev-page-btn");
+if (prevBtn) {
+    prevBtn.onclick = () => {
+        if (history.length > 1) {
+            history.back();
+        } else {
+            location.href = "index.html";
+        }
+    };
+}
+
+// ===== 品詞チェックボックスの設定 =====
+document.querySelectorAll("#pos-filter input").forEach(cb => {
+    cb.addEventListener("change", () => {
+        activePosSet.clear();
+
+        document.querySelectorAll("#pos-filter input:checked")
+            .forEach(checked => {
+                activePosSet.add(checked.value);
+            });
+
+        renderWords();
+    });
+});
