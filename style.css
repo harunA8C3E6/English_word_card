@@ -511,3 +511,32 @@ h2 {
 .prev-page-btn:hover {
     background: #2a2a2a;
 }
+
+.box {
+    border: 1px solid #333;
+}
+
+.pos-label {
+    font-size: 0.75rem;
+    color: #f5e58a;
+    margin-bottom: 2px;
+}
+
+.meaning-list {
+    margin: 0;
+    padding-left: 1em;
+}
+
+.meaning-list li {
+    line-height: 1.6;
+}
+
+.range-inputs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.range-inputs input {
+    width: 80px;
+}

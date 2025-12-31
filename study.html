@@ -4,6 +4,7 @@
     <title>単語学習</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="./style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
     <header class="header">
@@ -30,8 +31,8 @@
             <div class="modal-body" id="tag-checkbox-area"></div>
 
             <div class="modal-buttons">
-                <button id="tag-save-btn">保存</button>
-                <button id="tag-close-btn">閉じる</button>
+                <button id="tag-save-btn" class="prev-btn">保存</button>
+                <button id="tag-close-btn" class="prev-btn">閉じる</button>
             </div>
         </div>
     </div>
@@ -48,32 +49,108 @@
         </div>
     </div> -->
 
+    <!-- 品詞フィルタモーダル -->
+    <div id="pos-modal" class="modal modal-hidden">
+        <div class="modal-tag-content">
+            <h3>品詞フィルター</h3>
+
+            <iv class="modal-body" id="pos-checkbox-area">
+                <div><label><input type="checkbox" value="動" checked> 動詞</label></div>
+                <div><label><input type="checkbox" value="名" checked> 名詞</label></div>
+                <div><label><input type="checkbox" value="形" checked> 形容詞</label></div>
+                <div><label><input type="checkbox" value="副" checked> 副詞</label></div>
+                <div><label><input type="checkbox" value="その他">その他</label></div>
+            </iv>
+
+            <div class="modal-buttons">
+                <button id="pos-apply-btn" class="prev-btn">適用</button>
+                <button id="pos-close-btn" class="prev-btn">閉じる</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- テスト設定モーダル -->
+    <div id="test-modal" class="modal modal-hidden">
+        <div class="modal-tag-content">
+            <h3>テスト作成</h3>
+            
+            <label>
+                出題順：
+                <select id="order-select">
+                    <option value="random">ランダム</option>
+                    <option value="sequential">連番</option>
+                </select>
+            </label>
+            
+            <p>品詞：</p>
+            <label><input type="checkbox" value="動" checked> 動詞</label>
+            <label><input type="checkbox" value="名" checked> 名詞</label>
+            <label><input type="checkbox" value="形" checked> 形容詞</label>
+            <label><input type="checkbox" value="副" checked>副詞</label>
+            <label><input type="checkbox" value="その他" checked>その他</label>
+            
+            <p>出題範囲（単語番号）</p>
+            <div class="range-inputs">
+                <label>
+                    開始：
+                    <input type="number" id="range-start" min="1" value="1">
+                </label>
+                <label>
+                    終了：
+                    <input type="number" id="range-end" min="1">
+                </label>
+            </div>
+            
+            <p>作成するテストの種類数</p>
+            <label>
+                種類数：
+                <input
+                    type="number"
+                    id="test-count"
+                    min="1"
+                    max="10"
+                    value="1"
+                >
+            </label>
+            
+            <div class="modal-buttons">
+                <button id="create-test-btn" class="prev-btn">PDF作成</button>
+                <button id="test-maker-close" class="prev-btn">閉じる</button>
+            </div>
+        </div>
+    </div>
+
 
     <main class="container">
-        <div class="controls">
-            <input
-            type="number"
-            id="jump-input"
-            placeholder="番号で移動"
-            min="1"
-            style="width: 100px;"
-            />
-            <button id="jump-btn">移動</button>
-
-            <input
-            type="text"
-            id="word-search-input"
-            placeholder="単語で検索"
-            style="width: 140px;"
-            />
-            <button id="word-search-btn">検索</button>
-
-            <div class="controls" id="pos-filter">
-                <label><input type="checkbox" value="動" checked> 動</label>
-                <label><input type="checkbox" value="名" checked> 名</label>
-                <label><input type="checkbox" value="形" checked> 形</label>
-                <label><input type="checkbox" value="副" checked> 副</label>
+        <div>
+            <div class="controls">
+                <input
+                type="number"
+                id="jump-input"
+                placeholder="番号で移動"
+                min="1"
+                style="width: 100px;"
+                />
+                <button id="jump-btn">移動</button>
+                
+                <input
+                type="text"
+                id="word-search-input"
+                placeholder="単語で検索"
+                style="width: 140px;"
+                />
+                <button id="word-search-btn">検索</button>
             </div>
+
+            <!-- <div class="controls">
+                <button id="pos-filter-btn">品詞フィルター</button>
+            </div> -->
+
+            <div class="controls">
+                <button id="pos-filter-btn">品詞フィルター</button>
+                <button id="open-test-modal-btn">テスト作成</button>
+            </div>
+
 
         </div>
         <div class="controls">
@@ -95,6 +172,8 @@
     <!-- <button id="tagRestart">タグの初期化</button> -->
     </main>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="./NotoSansJP-Regular-base64.js"></script>
     <script src="./data.js"></script>
     <script src="./study.js"></script>
 </body>

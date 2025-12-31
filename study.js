@@ -6,7 +6,7 @@ let currentUtterance = null;
 
 // 品詞チェックボックス関連
 const POS_FILTER_KEY = "posFilter";
-const ALL_POS = ["動", "名", "形", "副"];
+const ALL_POS = ["動", "名", "形", "副", "その他"];
 
 let activePosSet = new Set(ALL_POS);
 
@@ -49,7 +49,6 @@ document.querySelectorAll("#pos-filter input").forEach(cb => {
         renderWords();
     });
 });
-
 
 // ===== 「ホーム/タグ一覧」に戻るボタン =====
 document.getElementById("back-btn").onclick = () => {
@@ -564,3 +563,642 @@ document.querySelectorAll("#pos-filter input").forEach(cb => {
         renderWords();
     });
 });
+
+// ===== 品詞フィルター用モーダル =====
+const posModal = document.getElementById("pos-modal");
+const posFilterBtn = document.getElementById("pos-filter-btn");
+const posApplyBtn = document.getElementById("pos-apply-btn");
+const posCloseBtn = document.getElementById("pos-close-btn");
+
+posFilterBtn.onclick = () => {
+    posModal.classList.remove("modal-hidden");
+};
+
+posCloseBtn.onclick = () => {
+    posModal.classList.add("modal-hidden");
+};
+
+posApplyBtn.onclick = () => {
+    activePosSet.clear();
+
+    const selected = [];
+
+    document
+        .querySelectorAll("#pos-checkbox-area input:checked")
+        .forEach(cb => {
+            activePosSet.add(cb.value);
+            selected.push(cb.value);
+        });
+
+        localStorage.setItem(
+            "posFilter",
+            JSON.stringify(selected)
+        );
+
+    posModal.classList.add("modal-hidden");
+    renderWords(); // ← 再描画
+};
+
+function loadPosFilterFromLocalStorage() {
+    const saved = JSON.parse(
+        localStorage.getItem("posFilter")
+    );
+
+    const checkboxes = document.querySelectorAll(
+        "#pos-checkbox-area input[type='checkbox']"
+    );
+
+    // 保存データがない場合は全チェック
+    if (!Array.isArray(saved)) {
+        checkboxes.forEach(cb => cb.checked = true);
+        return;
+    }
+
+    checkboxes.forEach(cb => {
+        cb.checked = saved.includes(cb.value);
+    });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    loadPosFilterFromLocalStorage();
+
+    activePosSet.clear();
+    document
+        .querySelectorAll("#pos-checkbox-area input:checked")
+        .forEach(cb => {
+            activePosSet.add(cb.value);
+        });
+
+    renderWords();
+});
+
+
+
+function renderJaByPos(jaArray) {
+    if (!Array.isArray(jaArray)) return "";
+
+    const grouped = {};
+
+    jaArray.forEach(({ pos, meaning }) => {
+        if (!activePosSet.has(pos)) return;
+
+        if (!grouped[pos]) grouped[pos] = [];
+        grouped[pos].push(meaning);
+    });
+
+    let html = "";
+
+    for (const pos in grouped) {
+        html += `
+            <div class="pos-block">
+                <div class="pos-label">${pos}</div>
+                <ul class="meaning-list">
+                    ${grouped[pos].map(m => `<li>${m}</li>`).join("")}
+                </ul>
+            </div>
+        `;
+    }
+
+    return html || `<div class="ja-line">（該当する品詞なし）</div>`;
+}
+
+// ===== テスト題名用ユーティリティ =====
+function makeRangeLabel(range) {
+    if (!range || !range.start || !range.end) return "";
+    return `（範囲：${range.start}～${range.end}）`;
+}
+
+function makeTestTitle(baseTitle, options) {
+    const rangeText = makeRangeLabel(options.range);
+    return `${baseTitle} ${rangeText}`;
+}
+
+// ===== テスト関連 =====
+// function setupJapaneseFont(doc) {
+//     doc.addFileToVFS(
+//         "NotoSansJP-Regular.ttf",
+//         NotoSansJP
+//     );
+//     doc.addFont(
+//         "NotoSansJP-Regular.ttf",
+//         "NotoSansJP",
+//         "normal"
+//     );
+//     doc.setFont("NotoSansJP");
+// }
+
+function filterWordsByPos(words, posSet) {
+    return words.filter(word =>
+        word.ja.some(j => posSet.has(j.pos))
+    );
+}
+
+function sortWords(words, order) {
+    if (order === "random") {
+        return [...words].sort(() => Math.random() - 0.5);
+    }
+    return words; // 連番
+}
+
+// function pickTestWords(allWords, options) {
+//     let words = filterWordsByRange(allWoeds, options.range);
+//     words = filterWordsByPos(allWords, options.posSet);
+//     words = sortWords(words, options.order);
+
+//     return words.slice(0, 50);
+// }
+
+function createQuestionLines(words) {
+    return words.map((w, i) => `${i + 1}. ${w.en}`);
+}
+
+// document.getElementById("create-test-btn").onclick = () => {
+//     const options = getTestOptions();
+//     const testWords = pickTestWords(wordData.system, options);
+
+//     if (testWords.length < 50) {
+//         alert("単語数が不足しています");
+//         return;
+//     }
+
+//     generateMultipleTestsPDF(systemWords, options);
+// };
+
+const testModal = document.getElementById("test-modal");
+const openTestModalBtn = document.getElementById("open-test-modal-btn");
+
+openTestModalBtn.onclick = () => {
+    testModal.classList.remove("modal-hidden");
+};
+
+document.getElementById("test-maker-close").onclick = () => {
+    testModal.classList.add("modal-hidden");
+}
+
+function getRangeOptions() {
+    const start = parseInt(document.getElementById("range-start").value, 10);
+    const end = parseInt(document.getElementById("range-end").value, 10);
+
+    return { start, end };
+}
+
+function filterWordsByRange(words, range) {
+    let startIdx = range.start - 1;
+    let endIdx = range.end - 1;
+
+    if (isNaN(startIdx) || startIdx < 0) startIdx = 0;
+    if (isNaN(endIdx) || endIdx >= words.length) endIdx = words.length - 1;
+
+    if (startIdx > endIdx) {
+        [startIdx, endIdx] = [endIdx, startIdx];
+    }
+
+    return words.slice(startIdx, endIdx + 1);
+}
+
+function pickRandomTestWords(allWords, options) {
+    // ① 単語番号で範囲指定
+    let words = filterWordsByRange(allWords, options.range);
+
+    // ② 品詞フィルタ
+    words = filterWordsByPos(words, options.posSet);
+
+    words = shuffleArray(words);
+
+    // ④ 50問
+    return words.slice(0, 50);
+}
+function pickSequentialWords(allWords, options) {
+    let words = filterWordsByRange(allWords, options.range);
+    words = filterWordsByPos(words, options.posSet);
+
+    return words; // ← 重要：sliceしない
+}
+
+function getTestOptions() {
+    const order = document.getElementById("order-select").value;
+
+    const posSet = new Set(
+        [...document.querySelectorAll("#test-modal input[type='checkbox']:checked")]
+            .map(cb => cb.value)
+    );
+
+    const range = getRangeOptions();
+    const testCount = getTestCount();
+
+    return { order, posSet, range, testCount };
+}
+
+// テスト作成ボタン
+// document.getElementById("create-test-btn").onclick = () => {
+//     const options = getTestOptions();
+//     let words = [];
+//     // const filteredWords = getWordsByRangeAndPos(options);
+
+//     if (options.order === "sequential") {
+//         // 連番：範囲内全て
+//         words = pickSequentialWords(wordData.system, options);
+//     } else {
+//         // ランダム：50語抽出
+//         words = pickRandomTestWords(wordData.system, options);
+//     }
+
+//     if (words.length === 0) {
+//         alert("条件に合う単語がありません");
+//         return;
+//     }
+
+//     generateCombinedTestPdf(words);
+// };
+document.getElementById("create-test-btn").onclick = () => {
+    const options = getTestOptions();
+
+    // 範囲＋品詞で絞り込んだ「母集団」
+    const baseWords = getWordsByRangeAndPos(options);
+
+    if (baseWords.length === 0) {
+        alert("条件に合う単語がありません");
+        return;
+    }
+
+    // ===== 連番 =====
+    if (options.order === "sequential") {
+        // 50語ずつ分割してそのままPDFへ
+        generateCombinedTestPdf(baseWords, options);
+        return;
+    }
+
+    // ===== ランダム（種類数対応） =====
+    const allTests = [];
+
+    for (let i = 0; i < options.testCount; i++) {
+        const testWords = shuffleArray(baseWords).slice(0, 50);
+
+        if (testWords.length < 50) {
+            alert("単語数が不足しています");
+            return;
+        }
+
+        allTests.push(testWords);
+    }
+
+    generateRandomTestsPdf(allTests, options);
+};
+// テスト作成ボタン終了
+
+document.getElementById("range-end").value = wordData.system.length;
+
+function drawTable(doc, words, showAnswer = false) {
+    const startY = 30;
+    const rowHeight = 7;
+
+    const leftX = 10;
+    const rightX = 150;
+
+    const colWidths = {
+        no: 8,
+        word: 38,
+        blank: 94
+    };
+
+    doc.setFontSize(10);
+
+    for (let i = 0; i < 25; i++) {
+        const y = startY + i * rowHeight;
+
+        if (words[i]) {
+            drawRow(
+                doc,
+                leftX,
+                y,
+                i + 1,
+                words[i],
+                colWidths,
+                rowHeight,
+                showAnswer
+            );
+        }
+
+        if (words[i + 25]) {
+            drawRow(
+                doc,
+                rightX,
+                y,
+                i + 26,
+                words[i + 25],
+                colWidths,
+                rowHeight,
+                showAnswer
+            );
+        }
+    }
+}
+
+
+function drawRow(doc, x, y, number, word, colWidths, height, showAnswer = false) {
+    // 番号
+    doc.rect(x, y, colWidths.no, height);
+    doc.text(
+        String(number),
+        x + colWidths.no / 2,
+        y + height / 2 + 2,
+        { align: "center" }
+    );
+
+    // 英単語
+    doc.rect(x + colWidths.no, y, colWidths.word, height);
+    doc.text(word.en, x + colWidths.no + 2, y + 5);
+
+    // 空欄
+    doc.rect(
+        x + colWidths.no + colWidths.word,
+        y,
+        colWidths.blank,
+        height
+    );
+
+    // 解答（解答PDFのみ）
+    if (showAnswer) {
+        doc.setFontSize(9);
+        doc.setTextColor(120);
+
+        doc.text(
+            getAnswerText(word),
+            x + colWidths.no + colWidths.word + 2,
+            y + 5,
+            { maxWidth: colWidths.blank - 4 }
+        );
+
+        doc.setFontSize(11);
+        doc.setTextColor(0);
+    }
+}
+
+// 解答の作成
+function getAnswerText(word) {
+    if (!Array.isArray(word.ja)) return "";
+
+    return word.ja
+        .map(j => j.meaning)
+        .join(" / ");
+}
+
+// 種類数の取得
+function getTestCount() {
+    const count = parseInt(
+        document.getElementById("test-count").value,
+        10
+    );
+
+    return isNaN(count) || count < 1 ? 1 : count;
+}
+
+// 複数種類作成できるようにするコード
+function createOneTest(words, options) {
+    let list = filterWordsByRange(words, options.range);
+    list = filterWordsByPos(list, options.posSet);
+    list = sortWords(list, options.order);
+
+    return list.slice(0, 50);
+}
+
+function generateMultipleTestsPDF(allWords, options) {
+    const { jsPDF } = window.jspdf;
+
+    const doc = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: "a4"
+    });
+
+    const labels = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    doc.setFont("NotoSansJP-Regular", "normal");
+
+    if (options.order === "sequential") {
+        // const chunks = splitIntoChunks(wordsLotOfTest, 50);
+
+        chunks.forEach((chunk, index) => {
+            generateTestPdf(chunk, index + 1);
+        });
+    } else {
+        // ランダムは今まで通り
+        generateCombinedTestPdf(words.slice(0, 50));
+    }
+
+    for (let i = 0; i < options.testCount; i++) {
+        const testWords = createOneTest(allWords, options);
+
+        if (testWords.length < 50) {
+            alert("単語数が不足しています");
+            return;
+        }
+
+        const label = labels[i];
+
+        /* ===== 問題ページ ===== */
+        if (i > 0) doc.addPage();
+        doc.setFontSize(20);
+        doc.text("英単語テスト（50問）", 45, 23, { align: "center" });
+
+        doc.setFontSize(15);
+        doc.text("学年：＿＿", 85, 23);
+        doc.text("番号：＿＿", 115, 23);
+        doc.text("名前：＿＿＿＿＿＿＿＿", 145, 23);
+
+        // 得点欄
+        doc.text("得点：＿＿＿ / 50", 220, 23)
+        // doc.text("＿＿＿ / 50", 250, 17);
+
+        // 下線
+        // doc.line(10, 28, 287, 28);
+
+        drawTable(doc, testWords, false);
+
+        /* ===== 解答ページ ===== */
+        doc.addPage();
+        doc.setFontSize(20);
+        doc.text("英単語テスト（解答）", 45, 17, { align: "center" });
+        drawTable(doc, testWords, true);
+    }
+
+    doc.save(`english_test_${options.testCount}_types.pdf`);
+}
+
+// 連番で、50を超える範囲を選択した場合の設定
+function splitIntoChunks(array, chunkSize = 50) {
+    const chunks = [];
+
+    for (let i = 0; i < array.length; i += chunkSize) {
+        chunks.push(array.slice(i, i + chunkSize));
+    }
+
+    return chunks;
+}
+
+function getWordsByRangeAndPos(options) {
+    const { range, posSet } = options;
+    const start = Number(range.start);
+    const end = Number(range.end);
+
+    // data.js にある単語配列（例：system）
+    const allWords = wordData.system;
+
+    return allWords.filter((word, index) => {
+        const wordNumber = index + 1;
+
+        // 範囲チェック
+        if (wordNumber < start || wordNumber > end) return false;
+
+        // 品詞チェック
+        if (!posSet || posSet.size === 0) return true;
+
+        return word.ja.some(j => posSet.has(j.pos));
+    });
+}
+
+const options = getTestOptions(); // order, range, etc.
+// let wordsLotOfTest = getWordsByRangeAndPos(options);
+
+// function generateTestPdf(wordsLotOfTest, testIndex) {
+//     const { jsPDF } = window.jspdf;
+//     const doc = new jsPDF({
+//         orientation: "landscape",
+//         unit: "mm",
+//         format: "a4"
+//     });
+
+
+//     doc.setFontSize(20);
+//     doc.text("英単語テスト（50問）", 45, 17, { align: "center" });
+
+//     doc.setFontSize(15);
+//     doc.text("学年：＿＿", 85, 17);
+//     doc.text("番号：＿＿", 115, 17);
+//     doc.text("名前：＿＿＿＿＿＿＿＿", 145, 17);
+
+//     // 得点欄
+//     doc.text("得点：＿＿＿ / 50", 220, 17);
+//     drawTable(doc, wordsLotOfTest, false);
+
+//     doc.addPage();
+//     doc.setFontSize(20);
+//     doc.text("英単語テスト（解答）", 45, 17, { align: "center" });
+//     drawTable(doc, wordsLotOfTest, true);
+
+//     doc.save(`英単語テスト_${testIndex}.pdf`);
+// }
+
+function shuffleArray(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+
+function getTodayString() {
+    const d = new Date();
+
+    const y = String(d.getFullYear()).slice(-2);
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+
+    return `${y}-${m}-${day}`;
+}
+
+function generateCombinedTestPdf(words) {
+    const { jsPDF } = window.jspdf;
+
+    const doc = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: "a4"
+    });
+
+    const chunkSize = 50;
+    const chunks = splitIntoChunks(words, chunkSize);
+    doc.setFont("NotoSansJP-Regular", "normal");
+
+    chunks.forEach((chunk, index) => {
+        if (index > 0) doc.addPage();
+
+        // ===== 問題ページ =====
+        doc.setFontSize(20);
+        doc.text(makeSequentialTestTitle("シス単-連番", options, index, chunk.length),148, 15, { align: "center" });
+
+        doc.setFontSize(15);
+        doc.text("学年：＿＿", 85, 25);
+        doc.text("番号：＿＿", 115, 25);
+        doc.text("名前：＿＿＿＿＿＿＿＿", 145, 25);
+
+        // 得点欄
+        doc.text("得点：＿＿＿ / 50", 220, 25);
+        // drawTable(doc, wordsLotOfTest, false);
+        drawTable(doc, chunk, false);
+
+        // 解答ページ
+        doc.addPage();
+        doc.setFontSize(20);
+        doc.text(makeSequentialTestTitle("シス単-連番（解答）", options, index, chunk.length), 148, 17, { align: "center" });
+        drawTable(doc, chunk, true);
+    });
+
+    doc.save(`シス単テスト連番_(${getTodayString()}).pdf`);
+}
+
+function generateRandomTestsPdf(tests) {
+    const { jsPDF } = window.jspdf;
+
+    const doc = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: "a4"
+    });
+
+    doc.setFont("NotoSansJP-Regular", "normal");
+
+    tests.forEach((words, index) => {
+        if (index > 0) doc.addPage();
+
+        // ===== 問題 =====
+        doc.setFontSize(20);
+        doc.text(makeTestTitle("シス単-ランダム", options), 148, 15, { align: "center" });
+
+        doc.setFontSize(15);
+        doc.text("学年：＿＿", 85, 25);
+        doc.text("番号：＿＿", 115, 25);
+        doc.text("名前：＿＿＿＿＿＿＿＿", 145, 25);
+        doc.text("得点：＿＿＿ / 50", 220, 25);
+
+        drawTable(doc, words, false);
+
+        // ===== 解答 =====
+        doc.addPage();
+        doc.setFontSize(20);
+        doc.text(makeTestTitle("シス単-ランダム（解答）", options), 148, 17, { align: "center" });
+        drawTable(doc, words, true);
+    });
+
+    doc.save(`シス単テストランダム_(${getTodayString()}).pdf`);
+}
+
+
+
+function makeSequentialRangeLabel(baseRange, chunkIndex, chunkSize, chunkLength) {
+    const start = baseRange.start + chunkIndex * chunkSize;
+    const end = start + chunkLength - 1;
+    return `（範囲：${start}～${end}）`;
+}
+
+function makeSequentialTestTitle(baseTitle, options, chunkIndex, chunkLength) {
+    const rangeText = makeSequentialRangeLabel(
+        options.range,
+        chunkIndex,
+        50,
+        chunkLength
+    );
+
+    return `${baseTitle} ${rangeText}`;
+}
