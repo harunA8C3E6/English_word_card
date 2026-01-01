@@ -8,7 +8,7 @@
 <!-- 既存CSS -->
 <link rel="stylesheet" href="./style.css">
 <!-- カード専用CSS -->
-<link rel="stylesheet" href="./card.css">
+<!-- <link rel="stylesheet" href="./card.css"> -->
 </head>
 <body>
 
@@ -19,6 +19,13 @@
 <main class="container card-page">
     <div class="card-container">
         <div class="card" id="card">
+            <div class="swipe-label known">知ってる</div>
+            <div class="swipe-label unknown">知らない</div>
+            <div class="card-inner">
+                <div class="card-front" id="card-front"></div>
+                <div class="card-back" id="card-back"></div>
+            </div>
+
             <div class="card-front">
                 <div class="card-en" id="card-en">follow</div>
             </div>
@@ -28,6 +35,11 @@
                     ～（の後）に続く
                 </div>
             </div>
+        </div>
+        <!-- デバッグ用操作ボタン（PC向け） -->
+        <div class="debug-buttons">
+            <button id="btn-unknown">← 知らない</button>
+            <button id="btn-known">知っている →</button>
         </div>
     </div>
 </main>

@@ -636,3 +636,88 @@ h2 {
     opacity: 0;
     transition: transform 0.4s, opacity 0.4s;
 }
+
+/* 次のカード出現アニメーション */
+.card.enter {
+    animation: card-enter 0.25s ease-out;
+}
+
+@keyframes card-enter {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* ===== スワイプラベル ===== */
+.swipe-label {
+    position: absolute;
+    top: 20px;
+    padding: 6px 14px;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 6px;
+    opacity: 0;
+    transition: opacity 0.15s;
+    pointer-events: none;
+}
+
+.swipe-label.known {
+    left: 20px;
+    color: #2e7d32;
+    border: 2px solid #2e7d32;
+}
+
+.swipe-label.unknown {
+    right: 20px;
+    color: #c62828;
+    border: 2px solid #c62828;
+}
+
+/* ===== 背景色（スワイプ中） ===== */
+.card.swiping-right {
+    background: #e8f5e9;
+}
+
+.card.swiping-left {
+    background: #fdecea;
+}
+
+
+
+
+
+
+/* ===== デバッグ用ボタン ===== */
+.debug-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.debug-buttons button {
+    flex: 1;
+    padding: 12px;
+    font-size: 1rem;
+    background: #1e1e1e;
+    color: #eee;
+    border: 1px solid #444;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.debug-buttons button:hover {
+    background: #2a2a2a;
+}
+
+/* スマホでは非表示（本番想定） */
+/* @media (max-width: 768px) {
+    .debug-buttons {
+        display: none;
+    }
+} */

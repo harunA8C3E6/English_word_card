@@ -13,9 +13,12 @@ console.log({ from, to, posFilter, randomMode, randomCount });
 
 
 
+
 const card = document.getElementById("card");
 const enEl = document.getElementById("card-en");
 const jaEl = document.getElementById("card-ja");
+const knownLabel = card.querySelector(".known");
+const unknownLabel = card.querySelector(".unknown");
 
 // ===== 学習用データ =====
 let studyWords = [];
@@ -83,29 +86,58 @@ card.addEventListener("touchstart", (e) => {
 });
 
 // タッチ移動
-card.addEventListener("touchmove", (e) => {
-    if (!isDragging) return;
+card.addEventListener("touchmove", e => {
+    if (!startX) return;
 
-    currentX = e.touches[0].clientX - startX;
-    card.style.transform = `
-        translateX(${currentX}px)
-        rotate(${currentX * 0.05}deg)
-    `;
+    const diffX = e.touches[0].clientX - startX;
+    const rotate = diffX / 15;
+
+    card.style.transform = `translateX(${diffX}px) rotate(${rotate}deg)`;
+
+    // 表示制御
+    if (diffX > 30) {
+        card.classList.add("swiping-right");
+        card.classList.remove("swiping-left");
+
+        knownLabel.style.opacity = 1;
+        unknownLabel.style.opacity = 0;
+    } else if (diffX < -30) {
+        card.classList.add("swiping-left");
+        card.classList.remove("swiping-right");
+
+        knownLabel.style.opacity = 0;
+        unknownLabel.style.opacity = 1;
+    } else {
+        resetSwipeUI();
+    }
 });
+
 
 // タッチ終了
-card.addEventListener("touchend", () => {
-    card.classList.remove("dragging");
+card.addEventListener("touchend", e => {
+    if (!startX) return;
 
-    if (Math.abs(currentX) > SWIPE_THRESHOLD) {
-        currentX > 0 ? swipeRight() : swipeLeft();
+    const diffX = e.changedTouches[0].clientX - startX;
+
+    resetSwipeUI();
+
+    if (diffX > threshold) {
+        handleAnswer("known");
+    } else if (diffX < -threshold) {
+        handleAnswer("unknown");
     } else {
-        resetPosition();
+        card.style.transform = "";
     }
 
-    currentX = 0;
-    isDragging = false;
+    startX = null;
 });
+
+function resetSwipeUI() {
+    card.classList.remove("swiping-right", "swiping-left");
+    knownLabel.style.opacity = 0;
+    unknownLabel.style.opacity = 0;
+}
+
 
 // ===== 判定 =====
 function swipeRight() {
@@ -132,11 +164,26 @@ function handleAnswer(isKnown) {
         nextCard();
     }, 400);
 }
+function handleAnswer(type) {
+    card.style.transition = "transform 0.2s";
+    card.style.transform =
+        type === "known"
+            ? "translateX(120%) rotate(10deg)"
+            : "translateX(-120%) rotate(-10deg)";
+
+    if (type === "known") knownWords.push(studyWords[currentIndex]);
+    if (type === "unknown") unknownWords.push(studyWords[currentIndex]);
+
+    setTimeout(nextCard, 200);
+}
+
+
 
 // ===== 次のカード =====
 function nextCard() {
+    // スワイプしたカードはそのまま消える
     card.classList.remove("swipe-right", "swipe-left");
-    card.style.transform = "";
+
     isFlipped = false;
     card.classList.remove("flipped");
 
@@ -147,8 +194,17 @@ function nextCard() {
         return;
     }
 
+    // 次のカードを初期状態で表示
+    card.style.transform = "";
     renderCard();
+
+    // 出現アニメーション
+    card.classList.add("enter");
+    setTimeout(() => {
+        card.classList.remove("enter");
+    }, 250);
 }
+
 
 // ===== 位置リセット =====
 function resetPosition() {
@@ -163,4 +219,21 @@ function finishStudy() {
 
     // 次：結果画面へ
     // location.href = "result.html";
+}
+
+
+// ===== デバッグ用ボタン =====
+const btnKnown = document.getElementById("btn-known");
+const btnUnknown = document.getElementById("btn-unknown");
+
+if (btnKnown && btnUnknown) {
+    btnKnown.onclick = () => {
+        card.classList.add("swipe-right");
+        handleAnswer(true);
+    };
+
+    btnUnknown.onclick = () => {
+        card.classList.add("swipe-left");
+        handleAnswer(false);
+    };
 }
