@@ -13,57 +13,92 @@ console.log({ from, to, posFilter, randomMode, randomCount });
 
 
 
-
 const card = document.getElementById("card");
+const enEl = document.getElementById("card-en");
+const jaEl = document.getElementById("card-ja");
 
-// タップで裏返す（スワイプとは独立）
-card.addEventListener("click", () => {
-    card.classList.toggle("flipped");
-});
+// ===== 学習用データ =====
+let studyWords = [];
+let currentIndex = 0;
 
+let knownWords = [];
+let unknownWords = [];
+
+// ===== 仮データ（後で設定モーダルから渡す）=====
+studyWords = [
+    {
+        en: "follow",
+        ja: [{ pos: "動", meaning: "～（の後）に続く" }]
+    },
+    {
+        en: "consider",
+        ja: [{ pos: "動", meaning: "～を考慮する" }]
+    },
+    {
+        en: "increase",
+        ja: [{ pos: "動", meaning: "増える／増やす" }]
+    }
+];
+
+// ===== 初期表示 =====
+renderCard();
+
+// ===== カード描画 =====
+function renderCard() {
+    const word = studyWords[currentIndex];
+    if (!word) return;
+
+    enEl.textContent = word.en;
+
+    jaEl.innerHTML = word.ja.map(j =>
+        `<div class="ja-line">
+            <span class="pos-tag" data-pos="${j.pos}">${j.pos}</span>
+            <span class="meaning">${j.meaning}</span>
+        </div>`
+    ).join("");
+}
+
+// =========================
+// タップ & スワイプ処理
+// =========================
 let startX = 0;
 let currentX = 0;
 let isDragging = false;
 let isFlipped = false;
 
-const SWIPE_THRESHOLD = 80; // 判定距離(px)
+const SWIPE_THRESHOLD = 80;
 
-// ===== タップ（表裏反転）=====
+// タップ（反転）
 card.addEventListener("click", () => {
-    if (isDragging) return; // スワイプ中は無効
+    if (isDragging) return;
     isFlipped = !isFlipped;
     card.classList.toggle("flipped", isFlipped);
 });
 
-// ===== タッチ開始 =====
+// タッチ開始
 card.addEventListener("touchstart", (e) => {
     startX = e.touches[0].clientX;
     isDragging = true;
     card.classList.add("dragging");
 });
 
-// ===== タッチ移動 =====
+// タッチ移動
 card.addEventListener("touchmove", (e) => {
     if (!isDragging) return;
 
     currentX = e.touches[0].clientX - startX;
-
     card.style.transform = `
         translateX(${currentX}px)
         rotate(${currentX * 0.05}deg)
     `;
 });
 
-// ===== タッチ終了 =====
+// タッチ終了
 card.addEventListener("touchend", () => {
     card.classList.remove("dragging");
 
     if (Math.abs(currentX) > SWIPE_THRESHOLD) {
-        if (currentX > 0) {
-            swipeRight();
-        } else {
-            swipeLeft();
-        }
+        currentX > 0 ? swipeRight() : swipeLeft();
     } else {
         resetPosition();
     }
@@ -72,33 +107,60 @@ card.addEventListener("touchend", () => {
     isDragging = false;
 });
 
-// ===== 判定処理 =====
+// ===== 判定 =====
 function swipeRight() {
-    console.log("知っている");
     card.classList.add("swipe-right");
     handleAnswer(true);
 }
 
 function swipeLeft() {
-    console.log("知らない");
     card.classList.add("swipe-left");
     handleAnswer(false);
 }
 
-// ===== 元の位置に戻す =====
+// ===== 回答処理 =====
+function handleAnswer(isKnown) {
+    const word = studyWords[currentIndex];
+
+    if (isKnown) {
+        knownWords.push(word);
+    } else {
+        unknownWords.push(word);
+    }
+
+    setTimeout(() => {
+        nextCard();
+    }, 400);
+}
+
+// ===== 次のカード =====
+function nextCard() {
+    card.classList.remove("swipe-right", "swipe-left");
+    card.style.transform = "";
+    isFlipped = false;
+    card.classList.remove("flipped");
+
+    currentIndex++;
+
+    if (currentIndex >= studyWords.length) {
+        finishStudy();
+        return;
+    }
+
+    renderCard();
+}
+
+// ===== 位置リセット =====
 function resetPosition() {
     card.style.transform = "";
 }
 
-// ===== 回答処理（後で拡張）=====
-function handleAnswer(isKnown) {
-    setTimeout(() => {
-        card.classList.remove("swipe-right", "swipe-left");
-        card.style.transform = "";
-        isFlipped = false;
-        card.classList.remove("flipped");
+// ===== 学習終了 =====
+function finishStudy() {
+    console.log("学習終了");
+    console.log("知っていた:", knownWords);
+    console.log("知らなかった:", unknownWords);
 
-        // TODO: 次の単語を表示
-        // setNextCard();
-    }, 400);
+    // 次：結果画面へ
+    // location.href = "result.html";
 }
