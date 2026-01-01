@@ -178,8 +178,6 @@ card.addEventListener("touchstart", onTouchStart, { passive: false });
 card.addEventListener("touchmove", onTouchMove, { passive: false });
 card.addEventListener("touchend", onTouchEnd, { passive: false });
 
-
-
 // ===== 判定 =====
 function swipeRight() {
     card.classList.add("swipe-right");
@@ -247,6 +245,49 @@ function finishStudy() {
     // 次：結果画面へ
     // location.href = "result.html";
 }
+
+// let startX = 0;
+let startY = 0;
+// let currentX = 0;
+let isSwiping = false;
+
+function onTouchStart(e) {
+    if (e.touches.length !== 1) return;
+
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    isSwiping = true;
+}
+
+function onTouchMove(e) {
+    if (!isSwiping) return;
+
+    currentX = e.touches[0].clientX;
+
+    // 横スワイプ優先（縦スクロール防止）
+    const dx = currentX - startX;
+    const dy = e.touches[0].clientY - startY;
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+        e.preventDefault(); // ← ここがあるので passive:false が必要
+    }
+}
+
+function onTouchEnd(e) {
+    if (!isSwiping) return;
+    isSwiping = false;
+
+    const dx = currentX - startX;
+
+    if (dx > 80) {
+        console.log("→ 知っている単語");
+    } else if (dx < -80) {
+        console.log("← 知らない単語");
+    } else {
+        console.log("タップ or スワイプ不足");
+    }
+}
+
 
 
 // ===== デバッグ用ボタン =====
