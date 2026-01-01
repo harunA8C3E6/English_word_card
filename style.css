@@ -540,3 +540,99 @@ h2 {
 .range-inputs input {
     width: 80px;
 }
+
+
+
+/* 以下　単語カード関連 */
+
+/* 単語カードページ専用 */
+.card-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 80px); /* ヘッダー分を除外 */
+}
+
+/* カード外枠 */
+.card-container {
+    width: 100%;
+    max-width: 360px;
+    perspective: 1000px;
+}
+
+/* カード本体 */
+.card {
+    width: 100%;
+    height: 220px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.6s;
+    cursor: pointer;
+}
+
+/* 表裏共通 */
+.card-front,
+.card-back {
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 20px;
+    box-sizing: border-box;
+
+    backface-visibility: hidden;
+    user-select: none;
+}
+
+/* 表 */
+.card-front {
+    background: #1e1e1e;
+    color: #eee;
+    font-size: 1.8rem;
+}
+
+/* 裏 */
+.card-back {
+    background: #f5e58a;
+    color: #333;
+    transform: rotateY(180deg);
+    font-size: 1.1rem;
+}
+
+/* 反転状態 */
+.card.flipped {
+    transform: rotateY(180deg);
+}
+
+/* 英語 */
+.card-en {
+    text-align: center;
+}
+
+/* 日本語 */
+.card-ja {
+    line-height: 1.6;
+}
+
+/* スワイプ中の移動 */
+.card.dragging {
+    transition: none;
+}
+
+/* 右に飛ぶ（知っている） */
+.card.swipe-right {
+    transform: translateX(120%) rotate(15deg);
+    opacity: 0;
+    transition: transform 0.4s, opacity 0.4s;
+}
+
+/* 左に飛ぶ（知らない） */
+.card.swipe-left {
+    transform: translateX(-120%) rotate(-15deg);
+    opacity: 0;
+    transition: transform 0.4s, opacity 0.4s;
+}

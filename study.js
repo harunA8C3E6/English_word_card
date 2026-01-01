@@ -726,10 +726,22 @@ function createQuestionLines(words) {
 
 const testModal = document.getElementById("test-modal");
 const openTestModalBtn = document.getElementById("open-test-modal-btn");
+const cardModal = document.getElementById("card-settings-modal");
+const cardModalBtn = document.getElementById("open-card-settings");
+const closecardModalBtn = document.getElementById("card-study-close");
 
 openTestModalBtn.onclick = () => {
     testModal.classList.remove("modal-hidden");
 };
+
+cardModalBtn.onclick = () => {
+    cardModal.classList.remove("modal-hidden");
+}
+
+closecardModalBtn.onclick = () => {
+    cardModal.classList.add("modal-hidden");
+}
+
 
 document.getElementById("test-maker-close").onclick = () => {
     testModal.classList.add("modal-hidden");
@@ -1040,19 +1052,19 @@ function getWordsByRangeAndPos(options) {
     const start = Number(range.start);
     const end = Number(range.end);
 
-    // data.js にある単語配列（例：system）
-    const allWords = wordData.system;
+    const allWords = words;
 
     return allWords.filter((word, index) => {
         const wordNumber = index + 1;
 
         // 範囲チェック
-        if (wordNumber < start || wordNumber > end) return false;
+        if (wordNumber < range.start || wordNumber > range.end) return false;
 
         // 品詞チェック
         if (!posSet || posSet.size === 0) return true;
 
-        return word.ja.some(j => posSet.has(j.pos));
+        return Array.isArray(word.ja) &&
+            word.ja.some(j => posSet.has(j.pos));
     });
 }
 
@@ -1126,7 +1138,7 @@ function generateCombinedTestPdf(words) {
 
         // ===== 問題ページ =====
         doc.setFontSize(20);
-        doc.text(makeSequentialTestTitle("シス単-連番", options, index, chunk.length),148, 15, { align: "center" });
+        doc.text(makeSequentialTestTitle(`${getCurrentTestLabel()}-連番`, options, index, chunk.length),148, 15, { align: "center" });
 
         doc.setFontSize(15);
         doc.text("学年：＿＿", 85, 25);
@@ -1141,11 +1153,11 @@ function generateCombinedTestPdf(words) {
         // 解答ページ
         doc.addPage();
         doc.setFontSize(20);
-        doc.text(makeSequentialTestTitle("シス単-連番（解答）", options, index, chunk.length), 148, 17, { align: "center" });
+        doc.text(makeSequentialTestTitle(`${getCurrentTestLabel()}-連番（解答）`, options, index, chunk.length), 148, 17, { align: "center" });
         drawTable(doc, chunk, true);
     });
 
-    doc.save(`シス単テスト連番_(${getTodayString()}).pdf`);
+    doc.save(`${getCurrentTestLabel()}テスト連番_(${getTodayString()}).pdf`);
 }
 
 function generateRandomTestsPdf(tests) {
@@ -1164,7 +1176,7 @@ function generateRandomTestsPdf(tests) {
 
         // ===== 問題 =====
         doc.setFontSize(20);
-        doc.text(makeTestTitle("シス単-ランダム", options), 148, 15, { align: "center" });
+        doc.text(makeTestTitle(`${getCurrentTestLabel()}-ランダム`, options), 148, 15, { align: "center" });
 
         doc.setFontSize(15);
         doc.text("学年：＿＿", 85, 25);
@@ -1177,11 +1189,11 @@ function generateRandomTestsPdf(tests) {
         // ===== 解答 =====
         doc.addPage();
         doc.setFontSize(20);
-        doc.text(makeTestTitle("シス単-ランダム（解答）", options), 148, 17, { align: "center" });
+        doc.text(makeTestTitle(`${getCurrentTestLabel()}-ランダム（解答）`, options), 148, 17, { align: "center" });
         drawTable(doc, words, true);
     });
 
-    doc.save(`シス単テストランダム_(${getTodayString()}).pdf`);
+    doc.save(`${getCurrentTestLabel()}テストランダム_(${getTodayString()}).pdf`);
 }
 
 
@@ -1202,3 +1214,82 @@ function makeSequentialTestTitle(baseTitle, options, chunkIndex, chunkLength) {
 
     return `${baseTitle} ${rangeText}`;
 }
+
+function getCurrentTestLabel() {
+    // タグページ優先
+    if (tagId) {
+        const name = tags[tagId]?.name ?? "タグ";
+        return `#${name}`;
+    }
+
+    // 単語帳ページ
+    if (book) {
+        return book.abbr ?? book.title;
+    }
+
+    return "単語帳";
+}
+
+function getBaseWords() {
+    // タグページ
+    if (tagId) {
+        const result = [];
+
+        Object.values(wordData).forEach(bookWords => {
+            bookWords.forEach(word => {
+                const tagsOfWord = wordTags[word.id] ?? [];
+
+                if (tagsOfWord.includes(tagId)) {
+                    result.push(word);
+                }
+            });
+        });
+
+        return result;
+    }
+
+    // 単語帳ページ
+    return wordData[bookId] ?? [];
+}
+
+
+function getWordsByRangeAndPos(options) {
+    const { range, posSet } = options;
+    const baseWords = getBaseWords();
+
+    return baseWords.filter((word, index) => {
+        const wordNumber = index + 1;
+
+        if (wordNumber < range.start || wordNumber > range.end) return false;
+        if (!posSet || posSet.size === 0) return true;
+
+        return word.ja?.some(j => posSet.has(j.pos));
+    });
+}
+
+
+// k－アド画面への推移
+const startBtn = document.getElementById("card-study-btn");
+
+startBtn.onclick = () => {
+    const from = Number(document.getElementById("range-from").value);
+    const to = Number(document.getElementById("range-to").value);
+    
+    // 選択されている品詞
+    const posChecked = Array.from(document.querySelectorAll("#pos-filter input[type='checkbox']:checked"))
+                            .map(cb => cb.value);
+
+    const random = document.getElementById("random-mode").checked;
+    const randomCount = Number(document.getElementById("random-count").value);
+
+    // URL パラメータを作成
+    const params = new URLSearchParams();
+    params.set("from", from);
+    params.set("to", to);
+    params.set("pos", posChecked.join(",")); // 例: "動,名"
+    params.set("random", random ? "1" : "0");
+    if (random) params.set("count", randomCount);
+
+    // 単語カードページに遷移
+    location.href = `card.html?${params.toString()}`;
+};

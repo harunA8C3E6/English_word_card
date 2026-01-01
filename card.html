@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>単語カード学習</title>
+
+<!-- 既存CSS -->
+<link rel="stylesheet" href="./style.css">
+<!-- カード専用CSS -->
+<link rel="stylesheet" href="./card.css">
+</head>
+<body>
+
+<header class="header">
+    <h1>単語カード学習</h1>
+</header>
+
+<main class="container card-page">
+    <div class="card-container">
+        <div class="card" id="card">
+            <div class="card-front">
+                <div class="card-en" id="card-en">follow</div>
+            </div>
+            <div class="card-back">
+                <div class="card-ja" id="card-ja">
+                    <span class="pos-tag" data-pos="動">動</span>
+                    ～（の後）に続く
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="./card.js"></script>
+</body>
+</html>

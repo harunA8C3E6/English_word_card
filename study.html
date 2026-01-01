@@ -120,6 +120,40 @@
         </div>
     </div>
 
+    <!-- 単語カードモーダル -->
+    <div class="modal modal-hidden" id="card-settings-modal">
+        <div class="modal-content">
+            <h3>単語カード設定</h3>
+
+            <div class="range-inputs">
+                <label>学習範囲：
+                    <input type="number" id="range-from" min="1" value="1"> ～
+                    <input type="number" id="range-to" min="1" value="10">
+                </label>
+            </div>
+
+            <div id="pos-filter">
+                <label><input type="checkbox" value="動" checked> 動</label>
+                <label><input type="checkbox" value="名" checked> 名</label>
+                <label><input type="checkbox" value="形" checked> 形</label>
+                <label><input type="checkbox" value="副" checked> 副</label>
+                <label><input type="checkbox" value="その他" checked>その他</label>
+            </div>
+
+            <label>
+                <input type="checkbox" id="random-mode"> ランダム出題
+            </label>
+
+            <div id="random-count-container" style="display:none;">
+                学習個数: <input type="number" id="random-count" min="1" value="10">
+            </div>
+
+            <div class="modal-buttons">
+                <button id="card-study-btn" class="prev-btn">学習開始</button>
+                <button id="card-study-close" class="prev-btn">閉じる</button>
+            </div>
+        </div>
+    </div>
 
     <main class="container">
         <div>
@@ -149,6 +183,8 @@
             <div class="controls">
                 <button id="pos-filter-btn">品詞フィルター</button>
                 <button id="open-test-modal-btn">テスト作成</button>
+                <button id="open-card-settings">単語カード学習</button>
+
             </div>
 
 

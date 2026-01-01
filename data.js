@@ -4,11 +4,13 @@ const wordBooks = [
         id: "system",
         title: "システム英単語",
         description: "多義語を除く英単語を掲載しました。",
+        abbr: "シス単" // テストPDFに表示される名前
     },
     {
         id: "math",
         title: "数理科学用語",
         description: "数学でよく用いられる単語",
+        abbr: "数理科学用語"
     }
 ];
 
