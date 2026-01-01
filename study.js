@@ -1293,3 +1293,29 @@ startBtn.onclick = () => {
     // 単語カードページに遷移
     location.href = `card.html?${params.toString()}`;
 };
+
+
+function saveStudySettings() {
+    const settings = {
+        posFilter: Array.from(
+            document.querySelectorAll("#pos-filter input:checked")
+        ).map(cb => cb.value),
+
+        showMeaning: document.getElementById("show-meaning").checked,
+        showExample: document.getElementById("show-example").checked,
+
+        order: document.querySelector('input[name="order"]:checked')?.value || "normal",
+
+        range: {
+            from: Number(document.getElementById("range-from").value || 1),
+            to: Number(document.getElementById("range-to").value || 9999)
+        }
+    };
+
+    localStorage.setItem("studySettings", JSON.stringify(settings));
+}
+
+document.getElementById("start-study-btn").addEventListener("click", () => {
+    saveStudySettings();
+    location.href = "card.html";
+});

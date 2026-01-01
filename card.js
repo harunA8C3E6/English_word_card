@@ -19,10 +19,122 @@ const enEl = document.getElementById("card-en");
 const jaEl = document.getElementById("card-ja");
 const knownLabel = card.querySelector(".known");
 const unknownLabel = card.querySelector(".unknown");
+const settings = JSON.parse(
+    localStorage.getItem("studySettings") || "{}"
+);
+
+function applySettings(words, settings) {
+    let result = [...words];
+
+    // 範囲
+    if (settings.range) {
+        result = result.slice(
+            settings.range.from - 1,
+            settings.range.to
+        );
+    }
+
+    // 品詞フィルタ
+    if (settings.posFilter?.length) {
+        result = result.filter(w =>
+            settings.posFilter.includes(w.pos)
+        );
+    }
+
+    // 並び順
+    if (settings.order === "random") {
+        result.sort(() => Math.random() - 0.5);
+    }
+
+    return result;
+}
+
+// ===== 全単語配列を作成 =====
+function getAllWords() {
+    const result = [];
+
+    Object.values(wordData).forEach(bookWords => {
+        bookWords.forEach(word => {
+            result.push(word);
+        });
+    });
+
+    return result;
+}
+
+const ALL_WORDS = getAllWords();
+
+
+
+let currentIndex = 0;
+let wordList = applySettings(ALL_WORDS, settings);
+
+function renderCard() {
+    const word = wordList[currentIndex];
+    if (!word) return;
+
+    card.classList.remove("flipped");
+
+    cardEn.textContent = word.en;
+
+    cardJa.innerHTML = `
+        <span class="pos-tag" data-pos="${word.pos}">
+            ${word.pos}
+        </span>
+        ${settings.showMeaning ? word.ja : ""}
+    `;
+}
+
+function swipeNext(direction) {
+    card.classList.add(
+        direction === "right" ? "swipe-right" : "swipe-left"
+    );
+
+    setTimeout(() => {
+        card.className = "card enter";
+        currentIndex++;
+        renderCard();
+    }, 300);
+}
+
+function swipeNext(direction) {
+    card.classList.add(
+        direction === "right" ? "swipe-right" : "swipe-left"
+    );
+
+    setTimeout(() => {
+        card.className = "card enter";
+        currentIndex++;
+        renderCard();
+    }, 300);
+}
+
+let startX = 0;
+
+card.addEventListener("touchstart", e => {
+    startX = e.touches[0].clientX;
+}, { passive: true });
+
+card.addEventListener("touchend", e => {
+    const diff = e.changedTouches[0].clientX - startX;
+    if (Math.abs(diff) > 60) {
+        swipeNext(diff > 0 ? "right" : "left");
+    }
+});
+
+btnKnown.onclick = () => swipeNext("right");
+btnUnknown.onclick = () => swipeNext("left");
+
+
+
+
+
+
+
 
 // ===== 学習用データ =====
 let studyWords = [];
-let currentIndex = 0;
+// let currentIndex = 0;
 
 let knownWords = [];
 let unknownWords = [];
@@ -100,7 +212,7 @@ function renderCard() {
 // =========================
 // タップ & スワイプ処理
 // =========================
-let startX = 0;
+// let startX = 0;
 let currentX = 0;
 let isDragging = false;
 let isFlipped = false;
