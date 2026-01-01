@@ -653,39 +653,8 @@ h2 {
     }
 }
 
-/* ===== スワイプラベル ===== */
-.swipe-label {
-    position: absolute;
-    top: 20px;
-    padding: 6px 14px;
-    font-size: 1rem;
-    font-weight: bold;
-    border-radius: 6px;
-    opacity: 0;
-    transition: opacity 0.15s;
-    pointer-events: none;
-}
 
-.swipe-label.known {
-    left: 20px;
-    color: #2e7d32;
-    border: 2px solid #2e7d32;
-}
 
-.swipe-label.unknown {
-    right: 20px;
-    color: #c62828;
-    border: 2px solid #c62828;
-}
-
-/* ===== 背景色（スワイプ中） ===== */
-.card.swiping-right {
-    background: #e8f5e9;
-}
-
-.card.swiping-left {
-    background: #fdecea;
-}
 
 
 

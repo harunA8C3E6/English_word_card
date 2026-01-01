@@ -46,6 +46,42 @@ studyWords = [
 // ===== 初期表示 =====
 renderCard();
 
+// ===== 単語生成 =====
+function createStudyWords(words, options) {
+    let list = [...words];
+
+    // ① 学習範囲（単語番号）
+    list = list.filter(word =>
+        word.id >= options.from && word.id <= options.to
+    );
+
+    // ② 品詞フィルタ
+    if (options.posFilter.length > 0) {
+        list = list.filter(word =>
+            options.posFilter.includes(word.pos)
+        );
+    }
+
+    // ③ ランダム処理
+    if (options.randomMode) {
+        shuffle(list);
+
+        // ④ 個数制限
+        list = list.slice(0, options.randomCount);
+    }
+
+    return list;
+}
+
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+
+
 // ===== カード描画 =====
 function renderCard() {
     const word = studyWords[currentIndex];
@@ -138,6 +174,11 @@ function resetSwipeUI() {
     unknownLabel.style.opacity = 0;
 }
 
+card.addEventListener("touchstart", onTouchStart, { passive: false });
+card.addEventListener("touchmove", onTouchMove, { passive: false });
+card.addEventListener("touchend", onTouchEnd, { passive: false });
+
+
 
 // ===== 判定 =====
 function swipeRight() {
@@ -164,20 +205,6 @@ function handleAnswer(isKnown) {
         nextCard();
     }, 400);
 }
-function handleAnswer(type) {
-    card.style.transition = "transform 0.2s";
-    card.style.transform =
-        type === "known"
-            ? "translateX(120%) rotate(10deg)"
-            : "translateX(-120%) rotate(-10deg)";
-
-    if (type === "known") knownWords.push(studyWords[currentIndex]);
-    if (type === "unknown") unknownWords.push(studyWords[currentIndex]);
-
-    setTimeout(nextCard, 200);
-}
-
-
 
 // ===== 次のカード =====
 function nextCard() {
