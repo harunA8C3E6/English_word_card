@@ -574,7 +574,6 @@ h2 {
     position: relative;
     transform-style: preserve-3d;
     transition: transform 0.3s ease, opacity 0.25s ease;
-    cursor: pointer;
 }
 
 .card.fade-in {
@@ -618,7 +617,7 @@ h2 {
 }
 
 /* ===== スライドアニメーション ===== */
-.card.slide-left {
+/* .card.slide-left {
     transform: translateX(-120%) rotateY(180deg);
     opacity: 0;
 }
@@ -626,7 +625,7 @@ h2 {
 .card.slide-right {
     transform: translateX(120%) rotateY(180deg);
     opacity: 0;
-}
+} */
 
 /* 元の位置に戻る用 */
 .card.reset {
@@ -679,7 +678,7 @@ h2 {
     color: #4caf50; /* 緑 */
 }
 
-.slide-left {
+/* .slide-left {
     transform: translateX(-120%);
     opacity: 0;
     transition: transform 0.3s, opacity 0.3s;
@@ -689,16 +688,16 @@ h2 {
     transform: translateX(120%);
     opacity: 0;
     transition: transform 0.3s, opacity 0.3s;
-}
+} */
 
 /* ★ Undo 用（逆方向から戻す） */
-.slide-back-left {
+/* .slide-back-left {
     transform: translateX(-120%);
 }
 
 .slide-back-right {
     transform: translateX(120%);
-}
+} */
 
 .numberBox {
     width: auto;

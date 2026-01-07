@@ -7,6 +7,7 @@ let startX = 0;
 let currentX = 0;
 let isDragging = false;
 let moved = false;
+let startTime = 0;
 
 const params = new URLSearchParams(location.search)
 const bookId = params.get("book");
@@ -36,9 +37,9 @@ const historyStack = [];
 // });
 
 // カード本体をクリックしてもめくれる（おすすめ）
-card.addEventListener("click", () => {
-    card.classList.toggle("flipped");
-});
+// card.addEventListener("click", () => {
+//     card.classList.toggle("flipped");
+// });
 
 // const params = new URLSearchParams(location.search);
 
@@ -105,15 +106,19 @@ card.addEventListener("touchend", () => {
     if (!isDragging) return;
     isDragging = false;
 
-    // ★ 動いていない = タップ → 何もしない
-    if (!moved) {
+    const diffX = currentX - startX;
+    const elapsed = Date.now() - startTime;
+    const threshold = 80;
+
+    // ===== タップ判定 =====
+    if (!moved && elapsed < 200) {
+        // タップ → めくるだけ
+        card.classList.toggle("flipped");
         card.style.transform = "";
         return;
     }
 
-    const diffX = currentX - startX;
-    const threshold = 80;
-
+    // ===== スワイプ判定 =====
     card.style.transition = "transform 0.3s ease, opacity 0.25s ease";
 
     if (diffX < -threshold) {
@@ -124,6 +129,7 @@ card.addEventListener("touchend", () => {
         card.style.transform = "";
     }
 });
+
 
 
 function swipeOut(direction) {
@@ -182,11 +188,13 @@ function swipeOut(direction) {
 card.addEventListener("touchstart", e => {
     startX = e.touches[0].clientX;
     currentX = startX;
+    startTime = Date.now();
     isDragging = true;
     moved = false;
 
     card.style.transition = "none";
 }, { passive: true });
+
 
 
 card.addEventListener("touchmove", e => {
@@ -195,13 +203,13 @@ card.addEventListener("touchmove", e => {
     currentX = e.touches[0].clientX;
     const diffX = currentX - startX;
 
-    if (Math.abs(diffX) > 5) {
-        moved = true; // ★ 少しでも動いたらスワイプ扱い
+    if (Math.abs(diffX) > 15) { // ★ 5 → 15 に変更
+        moved = true;
+        card.style.transform =
+            `translateX(${diffX}px) rotate(${diffX * 0.05}deg)`;
     }
-
-    card.style.transform =
-        `translateX(${diffX}px) rotate(${diffX * 0.05}deg)`;
 }, { passive: true });
+
 
 
 
