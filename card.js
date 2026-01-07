@@ -3,6 +3,10 @@ const back = document.getElementById("card-back");
 const flipBtn = document.getElementById("flip-btn");
 const card = document.getElementById("card");
 
+let startX = 0;
+let currentX = 0;
+let isDragging = false;
+
 const params = new URLSearchParams(location.search)
 const bookId = params.get("book");
 let words = wordData[bookId] ?? [];
@@ -95,19 +99,41 @@ function goNext(direction = "left") {
 }
 
 
-card.addEventListener("touchend", e => {
-    if (startX === null) return;
+card.addEventListener("touchend", () => {
+    if (!isDragging) return;
+    isDragging = false;
 
-    const diff = e.changedTouches[0].clientX - startX;
+    const diffX = currentX - startX;
+    const threshold = 80; // 判定距離（px）
 
-    if (diff < -50) {
-        goNext("left");   // 左＝要復習
-    } else if (diff > 50) {
-        goNext("right");  // 右＝覚えた
+    // アニメーション復活
+    card.style.transition = "transform 0.3s ease";
+
+    if (diffX < -threshold) {
+        // 左スワイプ確定
+        card.style.transform = "translateX(-120%) rotate(-15deg)";
+        setTimeout(() => {
+            card.style.transform = "";
+            goNext("left");
+        }, 300);
+
+    } else if (diffX > threshold) {
+        // 右スワイプ確定
+        card.style.transform = "translateX(120%) rotate(15deg)";
+        setTimeout(() => {
+            card.style.transform = "";
+            goNext("right");
+        }, 300);
+
+    } else {
+        // 戻す
+        card.style.transform = "";
     }
 
-    startX = null;
+    startX = 0;
+    currentX = 0;
 });
+
 
 
 // function goPrev() {
@@ -136,12 +162,25 @@ function slideCard(direction) {
     }, 300);
 }
 
-// スワイプ処理
-let startX = null;
-
 card.addEventListener("touchstart", e => {
     startX = e.touches[0].clientX;
+    isDragging = true;
+
+    // アニメーションを一時的に無効化
+    card.style.transition = "none";
 }, { passive: true });
+
+card.addEventListener("touchmove", e => {
+    if (!isDragging) return;
+
+    currentX = e.touches[0].clientX;
+    const diffX = currentX - startX;
+
+    // 指の移動に追従
+    card.style.transform = `translateX(${diffX}px) rotate(${diffX * 0.05}deg)`;
+}, { passive: true });
+
+
 
 // card.addEventListener("touchend", e => {
 //     if (startX === null) return;

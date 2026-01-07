@@ -691,3 +691,33 @@ h2 {
 .slide-back-right {
     transform: translateX(120%);
 }
+
+.numberBox {
+    width: auto;
+    padding: 8px 10px;
+    border: 1px solid #8b8484;
+    border-radius: 3px;
+    background: #9d9d9d;
+    color: #000;
+    font-size: 1.1rem;
+    height: 2rem;
+}
+
+.textbox {
+    width: auto;
+    padding: 8px 10px;
+    border: 1px solid #8b8484;
+    border-radius: 3px;
+    background: #9d9d9d;
+    color: #000;
+    font-size: 1rem;
+    /* height: 2rem; */
+}
+
+fieldset label {
+    display: block;
+}
+
+.emptyBox {
+    height: 1rem;
+}
