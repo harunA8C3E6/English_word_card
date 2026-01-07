@@ -4,6 +4,10 @@ let targetSerialNumber = null;
 let currentExampleText = "";
 let currentUtterance = null;
 
+// ===== URL パラメータ（共通）=====
+const urlParams = new URLSearchParams(location.search);
+
+
 // 品詞チェックボックス関連
 const POS_FILTER_KEY = "posFilter";
 const ALL_POS = ["動", "名", "形", "副", "その他"];
@@ -52,7 +56,10 @@ document.querySelectorAll("#pos-filter input").forEach(cb => {
 
 // ===== 「ホーム/タグ一覧」に戻るボタン =====
 document.getElementById("back-btn").onclick = () => {
-    const params = new URLSearchParams(location.search);
+    const from = Number(urlParams.get("from") || 1);
+    const to = Number(urlParams.get("to") || 10);
+    const bookKey = urlParams.get("book");
+
     if (params.has("tag")) {
         // タグ学習ページから来た場合
         location.href = "tags.html";
@@ -726,22 +733,13 @@ function createQuestionLines(words) {
 
 const testModal = document.getElementById("test-modal");
 const openTestModalBtn = document.getElementById("open-test-modal-btn");
-const cardModal = document.getElementById("card-settings-modal");
+// const cardModal = document.getElementById("card-setting-modal");
 const cardModalBtn = document.getElementById("open-card-settings");
 const closecardModalBtn = document.getElementById("card-study-close");
 
 openTestModalBtn.onclick = () => {
     testModal.classList.remove("modal-hidden");
 };
-
-cardModalBtn.onclick = () => {
-    cardModal.classList.remove("modal-hidden");
-}
-
-closecardModalBtn.onclick = () => {
-    cardModal.classList.add("modal-hidden");
-}
-
 
 document.getElementById("test-maker-close").onclick = () => {
     testModal.classList.add("modal-hidden");
@@ -1267,55 +1265,47 @@ function getWordsByRangeAndPos(options) {
     });
 }
 
+// 単語カード関連
 
-// k－アド画面への推移
-const startBtn = document.getElementById("card-study-btn");
+// モーダルを開く
+const openBtn = document.getElementById("open-card-setting");
+const closeBtn = document.getElementById("close-card-btn");
+const cardModal = document.getElementById("card-setting-modal");
 
-startBtn.onclick = () => {
-    const from = Number(document.getElementById("range-from").value);
-    const to = Number(document.getElementById("range-to").value);
-    
-    // 選択されている品詞
-    const posChecked = Array.from(document.querySelectorAll("#pos-filter input[type='checkbox']:checked"))
-                            .map(cb => cb.value);
+openBtn.addEventListener("click", () => {
+    cardModal.classList.remove("modal-hidden");
+});
 
-    const random = document.getElementById("random-mode").checked;
-    const randomCount = Number(document.getElementById("random-count").value);
+closeBtn.addEventListener("click", () => {
+    cardModal.classList.add("modal-hidden");
+});
 
-    // URL パラメータを作成
-    const params = new URLSearchParams();
-    params.set("from", from);
-    params.set("to", to);
-    params.set("pos", posChecked.join(",")); // 例: "動,名"
-    params.set("random", random ? "1" : "0");
-    if (random) params.set("count", randomCount);
+// ページ遷移
+// document.getElementById("start-study-btn").onclick = () => {
+//     const params = new URLSearchParams(location.search);
+//     const book = params.get("book");
 
-    // 単語カードページに遷移
-    location.href = `card.html?${params.toString()}`;
-};
-
-
-function saveStudySettings() {
-    const settings = {
-        posFilter: Array.from(
-            document.querySelectorAll("#pos-filter input:checked")
-        ).map(cb => cb.value),
-
-        showMeaning: document.getElementById("show-meaning").checked,
-        showExample: document.getElementById("show-example").checked,
-
-        order: document.querySelector('input[name="order"]:checked')?.value || "normal",
-
-        range: {
-            from: Number(document.getElementById("range-from").value || 1),
-            to: Number(document.getElementById("range-to").value || 9999)
-        }
-    };
-
-    localStorage.setItem("studySettings", JSON.stringify(settings));
-}
+//     location.href = `card.html?book=${book}`;
+// };
 
 document.getElementById("start-study-btn").addEventListener("click", () => {
-    saveStudySettings();
-    location.href = "card.html";
+    const params = new URLSearchParams(location.search);
+    const book = params.get("book");
+
+    const from = document.getElementById("range-from").value;
+    const to = document.getElementById("range-to").value;
+    const limit = document.getElementById("limit-count").value;
+    const order = document.getElementById("order-type").value;
+
+    const pos = [...document.querySelectorAll(
+        'fieldset input[type="checkbox"]:checked'
+    )].map(cb => cb.value).join(",");
+
+    location.href =
+        `card.html?book=${book}` +
+        `&from=${from}` +
+        `&to=${to}` +
+        `&limit=${limit}` +
+        `&pos=${pos}` +
+        `&order=${order}`;
 });

@@ -1,47 +1,64 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>単語カード学習</title>
-
-<!-- 既存CSS -->
-<link rel="stylesheet" href="./style.css">
-<!-- カード専用CSS -->
-<!-- <link rel="stylesheet" href="./card.css"> -->
+    <meta charset="UTF-8">
+    <title>カード学習</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 
 <header class="header">
-    <h1>単語カード学習</h1>
+    <button onclick="history.back()">← 戻る</button>
+    <h1>カード学習</h1>
 </header>
 
-<main class="container card-page">
-    <div class="card-container">
-        <div class="card" id="card">
-            <div class="swipe-label known">知ってる</div>
-            <div class="swipe-label unknown">知らない</div>
-            <div class="card-inner">
-                <div class="card-front" id="card-front"></div>
-                <div class="card-back" id="card-back"></div>
-            </div>
+<!-- 結果表示モーダル -->
+<div id="complete-modal" class="modal modal-hidden">
+    <div class="modal-tag-content">
+        <h2>学習完了 🎉</h2>
+        
+        <canvas id="result-chart" width="200" height="200"></canvas>
+        <p>総単語数：<span id="total-count"></span></p>
+        <p>覚えた：<span id="known-count"></span></p>
+        <p>要復習：<span id="review-count"></span></p>
 
-            <div class="card-front">
-                <div class="card-en" id="card-en">follow</div>
+        <button id="restart-review">要復習のみ再学習</button>
+        <button id="result-close">戻る</button>
+    </div>
+</div>
+
+
+<main class="container">
+    <progress id="progress-bar" value="1" max="20"></progress>
+    <div id="progress-text">
+        <span id="current-index">1</span> /
+        <span id="total-count-card">0</span>
+    </div>
+
+    <div class="card-container">
+        <div id="card" class="card">
+            <div class="card-face card-front" id="card-front">
             </div>
-            <div class="card-back">
-                <div class="card-ja" id="card-ja">
-                    <span class="pos-tag" data-pos="動">動</span>
-                    ～（の後）に続く
-                </div>
+            <div class="card-face card-back" id="card-back">
             </div>
-        </div>
-        <!-- デバッグ用操作ボタン（PC向け） -->
-        <div class="debug-buttons">
-            <button id="btn-unknown">← 知らない</button>
-            <button id="btn-known">知っている →</button>
         </div>
     </div>
+    <button id="flip-btn" class="button-text">めくる</button>
+
+    <!-- デバッグ用 -->
+    <div class="debug-buttons">
+        <button id="next-btn-left">←</button>
+        <button id="next-btn-right">→</button>
+    </div>
+
+    <button id="undo-btn">1つ前に戻る</button>
+
+    <div id="swipe-counter">
+        <span class="review">要復習：<span id="review-count-live">0</span></span>
+        <span class="known">覚えた：<span id="known-count-live">0</span></span>
+    </div>
+
 </main>
 
 <script src="./data.js"></script>

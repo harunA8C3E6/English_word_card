@@ -545,148 +545,149 @@ h2 {
 
 /* 以下　単語カード関連 */
 
-/* 単語カードページ専用 */
-.card-page {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: calc(100vh - 80px); /* ヘッダー分を除外 */
+/* .hidden {
+    display: none;
+} */
+
+#card {
+    margin: 40px auto;
+    padding: 40px;
+    max-width: 300px;
+    text-align: center;
+    font-size: 1.5rem;
+    border-radius: 8px;
+    background: #1f1f1f;
 }
 
-/* カード外枠 */
+/* ===== カード全体 ===== */
 .card-container {
-    width: 100%;
-    max-width: 360px;
-    perspective: 1000px;
+    perspective: 1000px;   /* 奥行き */
+    width: 300px;
+    height: 180px;
+    margin: 40px auto;
 }
 
-/* カード本体 */
+/* 回転する本体 */
 .card {
     width: 100%;
-    height: 220px;
+    height: 100%;
     position: relative;
     transform-style: preserve-3d;
-    transition: transform 0.6s;
+    transition: transform 0.6s ease;
     cursor: pointer;
 }
 
-/* 表裏共通 */
-.card-front,
-.card-back {
-    position: absolute;
-    inset: 0;
-    border-radius: 12px;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    padding: 20px;
-    box-sizing: border-box;
-
-    backface-visibility: hidden;
-    user-select: none;
-}
-
-/* 表 */
-.card-front {
-    background: #1e1e1e;
-    color: #eee;
-    font-size: 1.8rem;
-}
-
-/* 裏 */
-.card-back {
-    background: #f5e58a;
-    color: #333;
-    transform: rotateY(180deg);
-    font-size: 1.1rem;
-}
-
-/* 反転状態 */
+/* めくれた状態 */
 .card.flipped {
     transform: rotateY(180deg);
 }
 
-/* 英語 */
-.card-en {
-    text-align: center;
+/* 表裏共通 */
+.card-face {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 1.5rem;
+    border-radius: 8px;
+    backface-visibility: hidden;
+
+    background: #1e1e1e;
+    border: 1px solid #333;
 }
 
-/* 日本語 */
-.card-ja {
-    line-height: 1.6;
+/* 表 */
+.card-front {
+    color: #eee;
 }
 
-/* スワイプ中の移動 */
-.card.dragging {
+/* 裏 */
+.card-back {
+    transform: rotateY(180deg);
+    color: #f5e58a;
+}
+
+/* ===== スライドアニメーション ===== */
+.card.slide-left {
+    transform: translateX(-120%) rotateY(180deg);
+    opacity: 0;
+}
+
+.card.slide-right {
+    transform: translateX(120%) rotateY(180deg);
+    opacity: 0;
+}
+
+/* 元の位置に戻る用 */
+.card.reset {
     transition: none;
+    transform: translateX(0);
+    opacity: 1;
 }
 
-/* 右に飛ぶ（知っている） */
-.card.swipe-right {
-    transform: translateX(120%) rotate(15deg);
-    opacity: 0;
-    transition: transform 0.4s, opacity 0.4s;
-}
-
-/* 左に飛ぶ（知らない） */
-.card.swipe-left {
-    transform: translateX(-120%) rotate(-15deg);
-    opacity: 0;
-    transition: transform 0.4s, opacity 0.4s;
-}
-
-/* 次のカード出現アニメーション */
-.card.enter {
-    animation: card-enter 0.25s ease-out;
-}
-
-@keyframes card-enter {
-    from {
-        opacity: 0;
-        transform: scale(0.96);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-
-
-
-
-
-
-
-
-/* ===== デバッグ用ボタン ===== */
+/* デバック用ボタン */
 .debug-buttons {
     display: flex;
-    justify-content: space-between;
-    gap: 12px;
+    justify-content: center;
+    gap: 20px;
     margin-top: 20px;
 }
-
 .debug-buttons button {
-    flex: 1;
-    padding: 12px;
-    font-size: 1rem;
-    background: #1e1e1e;
+    padding: 8px 16px;
+    font-size: 1.2rem;
+    border-radius: 6px;
+    background: #2a2a2a;
     color: #eee;
     border: 1px solid #444;
-    border-radius: 8px;
-    cursor: pointer;
 }
 
-.debug-buttons button:hover {
-    background: #2a2a2a;
+#result-chart {
+    display: block;
+    margin: 16px auto;
 }
 
-/* スマホでは非表示（本番想定） */
-/* @media (max-width: 768px) {
-    .debug-buttons {
-        display: none;
-    }
-} */
+#progress-text {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+#swipe-counter {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 8px;
+}
+
+#swipe-counter .review {
+    color: #f44336; /* 赤 */
+}
+
+#swipe-counter .known {
+    color: #4caf50; /* 緑 */
+}
+
+.slide-left {
+    transform: translateX(-120%);
+    opacity: 0;
+    transition: transform 0.3s, opacity 0.3s;
+}
+
+.slide-right {
+    transform: translateX(120%);
+    opacity: 0;
+    transition: transform 0.3s, opacity 0.3s;
+}
+
+/* ★ Undo 用（逆方向から戻す） */
+.slide-back-left {
+    transform: translateX(-120%);
+}
+
+.slide-back-right {
+    transform: translateX(120%);
+}

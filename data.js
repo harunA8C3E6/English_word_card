@@ -25,7 +25,7 @@ const wordData = {
         { id: "math1", en: "true", ja: [ { pos: "名", meaning: "真"} ] },
         { id: "math2", en: "false", ja: [ { pos: "名", meaning: "偽" } ] },
         { id: "math3", en: "predicate", ja: [ { pos: "名", meaning: "述語" } ] },
-        { id: "math4", en: "proposition", ja: [ { pos: "命題", meaning: "命題"} ] },
+        { id: "math4", en: "proposition", ja: [ { pos: "名", meaning: "命題"} ] },
         { id: "math5", en: "logical con-nective", ja: [ { pos: "名", meaning: "論理結合子" } ] },
         { id: "math6", en: "logical formula", ja: [ {pos: "名", meaning: "論理式" } ] },
         // { id: "math7"}

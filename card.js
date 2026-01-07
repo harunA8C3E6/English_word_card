@@ -1,419 +1,409 @@
-// URL パラメータ取得
-const params = new URLSearchParams(location.search);
-const from = Number(params.get("from") || 1);
-const to = Number(params.get("to") || 10);
-const posFilter = (params.get("pos") || "").split(",").filter(Boolean);
-const randomMode = params.get("random") === "1";
-const randomCount = Number(params.get("count") || 10);
-
-console.log({ from, to, posFilter, randomMode, randomCount });
-
-// ここから単語カード用に wordData から範囲を抽出して表示可能
-
-
-
-
-
+const front = document.getElementById("card-front");
+const back = document.getElementById("card-back");
+const flipBtn = document.getElementById("flip-btn");
 const card = document.getElementById("card");
-const enEl = document.getElementById("card-en");
-const jaEl = document.getElementById("card-ja");
-const knownLabel = card.querySelector(".known");
-const unknownLabel = card.querySelector(".unknown");
-const settings = JSON.parse(
-    localStorage.getItem("studySettings") || "{}"
-);
 
-function applySettings(words, settings) {
-    let result = [...words];
-
-    // 範囲
-    if (settings.range) {
-        result = result.slice(
-            settings.range.from - 1,
-            settings.range.to
-        );
-    }
-
-    // 品詞フィルタ
-    if (settings.posFilter?.length) {
-        result = result.filter(w =>
-            settings.posFilter.includes(w.pos)
-        );
-    }
-
-    // 並び順
-    if (settings.order === "random") {
-        result.sort(() => Math.random() - 0.5);
-    }
-
-    return result;
-}
-
-// ===== 全単語配列を作成 =====
-function getAllWords() {
-    const result = [];
-
-    Object.values(wordData).forEach(bookWords => {
-        bookWords.forEach(word => {
-            result.push(word);
-        });
-    });
-
-    return result;
-}
-
-const ALL_WORDS = getAllWords();
-
-
-
+const params = new URLSearchParams(location.search)
+const bookId = params.get("book");
+let words = wordData[bookId] ?? [];
+const from = Number(params.get("from") ?? 1);
+const to = Number(params.get("to") ?? words.length);
+const limit = Number(params.get("limit"));
+const order = params.get("order");
+const rawPos = params.get("pos");
+const posFilter = rawPos ? rawPos.split(",") : [];
 let currentIndex = 0;
-let wordList = applySettings(ALL_WORDS, settings);
+const POS_MAP = {
+    verb: "動",
+    noun: "名",
+    adj: "形",
+    adv: "副",
+    other: "その他"
+};
 
-function renderCard() {
-    const word = wordList[currentIndex];
-    if (!word) return;
+const reviewWords = []; // 左（要復習）
+const knownWords = [];  // 右（覚えた）
+const historyStack = [];
 
-    card.classList.remove("flipped");
+// flipBtn.addEventListener("click", () => {
+//     front.classList.toggle("hidden");
+//     back.classList.toggle("hidden");
+// });
 
-    cardEn.textContent = word.en;
-
-    cardJa.innerHTML = `
-        <span class="pos-tag" data-pos="${word.pos}">
-            ${word.pos}
-        </span>
-        ${settings.showMeaning ? word.ja : ""}
-    `;
-}
-
-function swipeNext(direction) {
-    card.classList.add(
-        direction === "right" ? "swipe-right" : "swipe-left"
-    );
-
-    setTimeout(() => {
-        card.className = "card enter";
-        currentIndex++;
-        renderCard();
-    }, 300);
-}
-
-function swipeNext(direction) {
-    card.classList.add(
-        direction === "right" ? "swipe-right" : "swipe-left"
-    );
-
-    setTimeout(() => {
-        card.className = "card enter";
-        currentIndex++;
-        renderCard();
-    }, 300);
-}
-
-let startX = 0;
-
-card.addEventListener("touchstart", e => {
-    startX = e.touches[0].clientX;
-}, { passive: true });
-
-card.addEventListener("touchend", e => {
-    const diff = e.changedTouches[0].clientX - startX;
-    if (Math.abs(diff) > 60) {
-        swipeNext(diff > 0 ? "right" : "left");
-    }
+// カード本体をクリックしてもめくれる（おすすめ）
+card.addEventListener("click", () => {
+    card.classList.toggle("flipped");
 });
 
-btnKnown.onclick = () => swipeNext("right");
-btnUnknown.onclick = () => swipeNext("left");
+// const params = new URLSearchParams(location.search);
 
-
-
-
-
-
-
-
-// ===== 学習用データ =====
-let studyWords = [];
+// const words = wordData[bookId] ?? [];
 // let currentIndex = 0;
 
-let knownWords = [];
-let unknownWords = [];
-
-// ===== 仮データ（後で設定モーダルから渡す）=====
-studyWords = [
-    {
-        en: "follow",
-        ja: [{ pos: "動", meaning: "～（の後）に続く" }]
-    },
-    {
-        en: "consider",
-        ja: [{ pos: "動", meaning: "～を考慮する" }]
-    },
-    {
-        en: "increase",
-        ja: [{ pos: "動", meaning: "増える／増やす" }]
-    }
-];
-
-// ===== 初期表示 =====
-renderCard();
-
-// ===== 単語生成 =====
-function createStudyWords(words, options) {
-    let list = [...words];
-
-    // ① 学習範囲（単語番号）
-    list = list.filter(word =>
-        word.id >= options.from && word.id <= options.to
-    );
-
-    // ② 品詞フィルタ
-    if (options.posFilter.length > 0) {
-        list = list.filter(word =>
-            options.posFilter.includes(word.pos)
-        );
-    }
-
-    // ③ ランダム処理
-    if (options.randomMode) {
-        shuffle(list);
-
-        // ④ 個数制限
-        list = list.slice(0, options.randomCount);
-    }
-
-    return list;
-}
-
-function shuffle(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-}
-
-
-
-// ===== カード描画 =====
 function renderCard() {
-    const word = studyWords[currentIndex];
+    const word = words[currentIndex];
     if (!word) return;
 
-    enEl.textContent = word.en;
+    front.textContent = word.en;
 
-    jaEl.innerHTML = word.ja.map(j =>
-        `<div class="ja-line">
-            <span class="pos-tag" data-pos="${j.pos}">${j.pos}</span>
-            <span class="meaning">${j.meaning}</span>
-        </div>`
-    ).join("");
+    if (Array.isArray(word.ja)) {
+        back.innerHTML = word.ja
+            .map(j => `${j.pos}：${j.meaning}`)
+            .join("<br>");
+    } else {
+        back.textContent = word.ja;
+    }
+
+    updateProgress(); // ★追加
 }
 
-// =========================
-// タップ & スワイプ処理
-// =========================
-// let startX = 0;
-let currentX = 0;
-let isDragging = false;
-let isFlipped = false;
+// renderCard();
 
-const SWIPE_THRESHOLD = 80;
+function goNext(direction = "left") {
+    const word = words[currentIndex];
+    if (!word) return;
 
-// タップ（反転）
-card.addEventListener("click", () => {
-    if (isDragging) return;
-    isFlipped = !isFlipped;
-    card.classList.toggle("flipped", isFlipped);
-});
+    historyStack.push({
+        index: currentIndex,
+        direction: direction,
+        word: word
+    });
 
-// タッチ開始
-card.addEventListener("touchstart", (e) => {
-    startX = e.touches[0].clientX;
-    isDragging = true;
-    card.classList.add("dragging");
-});
-
-// タッチ移動
-card.addEventListener("touchmove", e => {
-    if (!startX) return;
-
-    const diffX = e.touches[0].clientX - startX;
-    const rotate = diffX / 15;
-
-    card.style.transform = `translateX(${diffX}px) rotate(${rotate}deg)`;
-
-    // 表示制御
-    if (diffX > 30) {
-        card.classList.add("swiping-right");
-        card.classList.remove("swiping-left");
-
-        knownLabel.style.opacity = 1;
-        unknownLabel.style.opacity = 0;
-    } else if (diffX < -30) {
-        card.classList.add("swiping-left");
-        card.classList.remove("swiping-right");
-
-        knownLabel.style.opacity = 0;
-        unknownLabel.style.opacity = 1;
+    // 評価を記録
+    if (direction === "left") {
+        if (!reviewWords.includes(word)) {
+            reviewWords.push(word);
+        }
     } else {
-        resetSwipeUI();
+        if (!knownWords.includes(word)) {
+            knownWords.push(word);
+        }
     }
-});
+
+    updateSwipeCounter(); // ★追加
+
+    const isLast = currentIndex >= words.length - 1;
+
+    slideCard(direction);
+
+    if (isLast) {
+        setTimeout(showCompleteModal, 300);
+        return;
+    }
+
+    currentIndex++;
+}
 
 
-// タッチ終了
 card.addEventListener("touchend", e => {
-    if (!startX) return;
+    if (startX === null) return;
 
-    const diffX = e.changedTouches[0].clientX - startX;
+    const diff = e.changedTouches[0].clientX - startX;
 
-    resetSwipeUI();
-
-    if (diffX > threshold) {
-        handleAnswer("known");
-    } else if (diffX < -threshold) {
-        handleAnswer("unknown");
-    } else {
-        card.style.transform = "";
+    if (diff < -50) {
+        goNext("left");   // 左＝要復習
+    } else if (diff > 50) {
+        goNext("right");  // 右＝覚えた
     }
 
     startX = null;
 });
 
-function resetSwipeUI() {
-    card.classList.remove("swiping-right", "swiping-left");
-    knownLabel.style.opacity = 0;
-    unknownLabel.style.opacity = 0;
-}
 
-card.addEventListener("touchstart", onTouchStart, { passive: false });
-card.addEventListener("touchmove", onTouchMove, { passive: false });
-card.addEventListener("touchend", onTouchEnd, { passive: false });
+// function goPrev() {
+//     if (currentIndex <= 0) return;
 
-// ===== 判定 =====
-function swipeRight() {
-    card.classList.add("swipe-right");
-    handleAnswer(true);
-}
+//     slideCard("right");
+//     currentIndex--;
+// }
 
-function swipeLeft() {
-    card.classList.add("swipe-left");
-    handleAnswer(false);
-}
-
-// ===== 回答処理 =====
-function handleAnswer(isKnown) {
-    const word = studyWords[currentIndex];
-
-    if (isKnown) {
-        knownWords.push(word);
-    } else {
-        unknownWords.push(word);
-    }
-
-    setTimeout(() => {
-        nextCard();
-    }, 400);
-}
-
-// ===== 次のカード =====
-function nextCard() {
-    // スワイプしたカードはそのまま消える
-    card.classList.remove("swipe-right", "swipe-left");
-
-    isFlipped = false;
+// スライド処理
+function slideCard(direction) {
     card.classList.remove("flipped");
 
-    currentIndex++;
+    card.classList.add(
+        direction === "left" ? "slide-left" : "slide-right"
+    );
 
-    if (currentIndex >= studyWords.length) {
-        finishStudy();
+    setTimeout(() => {
+        card.classList.add("reset");
+        renderCard();
+
+        // 再描画トリガ
+        card.offsetHeight;
+
+        card.classList.remove("slide-left", "slide-right", "reset");
+    }, 300);
+}
+
+// スワイプ処理
+let startX = null;
+
+card.addEventListener("touchstart", e => {
+    startX = e.touches[0].clientX;
+}, { passive: true });
+
+// card.addEventListener("touchend", e => {
+//     if (startX === null) return;
+
+//     const endX = e.changedTouches[0].clientX;
+//     const diff = endX - startX;
+
+//     if (diff < -50) {
+//         goNext("left");   // 左スワイプ → 次
+//     } else if (diff > 50) {
+//         goNext("right");   // 右スワイプ → 前
+//     }
+
+//     startX = null;
+// });
+
+
+// 単語配列を加工
+let filteredWords = words
+.slice(from - 1, to || words.length)
+.filter(w => {
+    if (posFilter.length === 0) return true;
+    if (!Array.isArray(w.ja)) return true;
+    return w.ja.some(j => posFilter.some(p => POS_MAP[p] === j.pos));
+});
+
+if (order === "random") {
+    filteredWords.sort(() => Math.random() - 0.5);
+}
+
+if (limit && limit < filteredWords.length) {
+    filteredWords = filteredWords.slice(0, limit);
+}
+
+words = filteredWords;
+currentIndex = 0;
+renderCard();
+
+if (words.length === 0) {
+    front.textContent = "対象の単語がありません";
+    back.textContent = "";
+}
+
+// モーダル関連
+function showCompleteModal() {
+    const total = words.length;
+    const known = knownWords.length;
+    const review = reviewWords.length;
+
+    document.getElementById("total-count").textContent = words.length;
+    document.getElementById("known-count").textContent = knownWords.length;
+    document.getElementById("review-count").textContent = reviewWords.length;
+
+    drawResultChart(known, review); // ★ 追加
+
+    document.getElementById("complete-modal")
+        .classList.remove("modal-hidden");
+}
+
+// 再学習用関数
+document.getElementById("restart-review").addEventListener("click", () => {
+    if (reviewWords.length === 0) {
+        alert("要復習の単語はありません");
         return;
     }
 
-    // 次のカードを初期状態で表示
-    card.style.transform = "";
+    words = [...reviewWords]; // コピー重要
+    reviewWords.length = 0;
+    knownWords.length = 0;
+    currentIndex = 0;
+
+    document.getElementById("complete-modal")
+        .classList.add("modal-hidden");
+
     renderCard();
+    clearChart();
+    resetSwipeCounter();
+});
 
-    // 出現アニメーション
-    card.classList.add("enter");
-    setTimeout(() => {
-        card.classList.remove("enter");
-    }, 250);
+// document.getElementById("restart-review").addEventListener("click", () => {
+//     if (reviewWords.length === 0) {
+//         alert("要復習の単語はありません");
+//         return;
+//     }
+
+//     // 出題配列を「要復習のみ」に置き換え
+//     words = [...reviewWords];
+
+//     // 評価結果をリセット
+//     reviewWords.length = 0;
+//     knownWords.length = 0;
+
+//     currentIndex = 0;
+
+//     // モーダルを閉じる
+//     document.getElementById("complete-modal")
+//         .classList.add("hidden");
+
+//     // 最初のカードを表示
+//     renderCard();
+// });
+
+
+// slideCard(direction);
+// setTimeout(showCompleteModal, 300);
+
+
+// 円グラフの作成関数
+function drawResultChart(known, review) {
+    const canvas = document.getElementById("result-chart");
+    const ctx = canvas.getContext("2d");
+
+    const total = known + review;
+    if (total === 0) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = canvas.width / 2 - 10;
+
+    let startAngle = -Math.PI / 2;
+
+    // ===== 覚えた（緑） =====
+    const knownAngle = (known / total) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY);
+    ctx.arc(centerX, centerY, radius, startAngle, startAngle + knownAngle);
+    ctx.fillStyle = "#4caf50";
+    ctx.fill();
+
+    startAngle += knownAngle;
+
+    // ===== 要復習（赤） =====
+    const reviewAngle = (review / total) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY);
+    ctx.arc(centerX, centerY, radius, startAngle, startAngle + reviewAngle);
+    ctx.fillStyle = "#f44336";
+    ctx.fill();
+
+    // ===== 中央の正答率テキスト =====
+    const accuracy = Math.round((known / total) * 100);
+
+    ctx.fillStyle = "#333";
+    ctx.font = "bold 28px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(`${accuracy}%`, centerX, centerY);
+    ctx.font = "12px sans-serif";
+    ctx.fillStyle = "#333";
+    ctx.fillText("正答率", centerX, centerY - 22);
+
 }
 
-
-// ===== 位置リセット =====
-function resetPosition() {
-    card.style.transform = "";
+function clearChart() {
+    const canvas = document.getElementById("result-chart");
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
-// ===== 学習終了 =====
-function finishStudy() {
-    console.log("学習終了");
-    console.log("知っていた:", knownWords);
-    console.log("知らなかった:", unknownWords);
+// 結果モーダルを閉じる
+document.getElementById("result-close").onclick = () => {
+    location.href =`study.html?book=${bookId}`
+};
 
-    // 次：結果画面へ
-    // location.href = "result.html";
+// 学習進度表示
+function updateProgress() {
+    const current = currentIndex + 1;
+    document.getElementById("current-index").textContent = current;
+    document.getElementById("total-count-card").textContent = words.length;
+
+    const bar = document.getElementById("progress-bar");
+    bar.max = words.length;
+    bar.value = current;
 }
 
-// let startX = 0;
-let startY = 0;
-// let currentX = 0;
-let isSwiping = false;
-
-function onTouchStart(e) {
-    if (e.touches.length !== 1) return;
-
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-    isSwiping = true;
+function updateSwipeCounter() {
+    document.getElementById("review-count-live").textContent = reviewWords.length;
+    document.getElementById("known-count-live").textContent = knownWords.length;
 }
 
-function onTouchMove(e) {
-    if (!isSwiping) return;
-
-    currentX = e.touches[0].clientX;
-
-    // 横スワイプ優先（縦スクロール防止）
-    const dx = currentX - startX;
-    const dy = e.touches[0].clientY - startY;
-
-    if (Math.abs(dx) > Math.abs(dy)) {
-        e.preventDefault(); // ← ここがあるので passive:false が必要
-    }
+function resetSwipeCounter() {
+    document.getElementById("review-count-live").textContent = 0;
+    document.getElementById("known-count-live").textContent = 0;
 }
 
-function onTouchEnd(e) {
-    if (!isSwiping) return;
-    isSwiping = false;
+// ひとつ前に戻る関数
+function undoLastAction() {
+    if (historyStack.length === 0) return;
 
-    const dx = currentX - startX;
+    const last = historyStack.pop();
 
-    if (dx > 80) {
-        console.log("→ 知っている単語");
-    } else if (dx < -80) {
-        console.log("← 知らない単語");
+    // インデックスを戻す
+    currentIndex = last.index;
+
+    // 評価を取り消す
+    if (last.direction === "left") {
+        const i = reviewWords.lastIndexOf(last.word);
+        if (i !== -1) reviewWords.splice(i, 1);
     } else {
-        console.log("タップ or スワイプ不足");
+        const i = knownWords.lastIndexOf(last.word);
+        if (i !== -1) knownWords.splice(i, 1);
     }
+
+    // カウンター更新
+    updateSwipeCounter();
+
+    slideBack(last.direction);
+
+    // カードを表示（アニメーションなし）
+    card.classList.remove("flipped");
+    renderCard();
 }
 
+document.getElementById("undo-btn").addEventListener("click", undoLastAction);
 
-
-// ===== デバッグ用ボタン =====
-const btnKnown = document.getElementById("btn-known");
-const btnUnknown = document.getElementById("btn-unknown");
-
-if (btnKnown && btnUnknown) {
-    btnKnown.onclick = () => {
-        card.classList.add("swipe-right");
-        handleAnswer(true);
-    };
-
-    btnUnknown.onclick = () => {
-        card.classList.add("swipe-left");
-        handleAnswer(false);
-    };
+function updateUndoButton() {
+    document.getElementById("undo-btn").disabled = historyStack.length === 0;
 }
+
+function slideBack(direction) {
+    card.classList.remove("flipped");
+
+    // 一度画面外に置く（逆方向）
+    const backClass =
+        direction === "left" ? "slide-back-right" : "slide-back-left";
+
+    card.classList.add(backClass);
+
+    // 強制再描画
+    card.offsetHeight;
+
+    // 元の位置へ戻す（アニメーション）
+    card.style.transition = "transform 0.3s, opacity 0.3s";
+    card.classList.remove(backClass);
+}
+
+let isAnimating = false;
+
+
+
+
+
+
+
+
+
+// デバック用ボタン設定
+// function goNext(direction = "left") {
+//     if (currentIndex >= words.length - 1) return;
+
+//     slideCard(direction);
+//     currentIndex++;
+// }
+
+
+// function goPrev() {
+//     if (currentIndex <= 0) return;
+//     slideCard("right");
+//     currentIndex--;
+// }
+
+document.getElementById("next-btn-left").addEventListener("click", () => goNext("left"));
+document.getElementById("next-btn-right").addEventListener("click", () => goNext("right"));
