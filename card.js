@@ -6,10 +6,7 @@ const card = document.getElementById("card");
 let startX = 0;
 let currentX = 0;
 let isDragging = false;
-let moved = false;
-let startTime = 0;
 
-const cardWrapper = document.getElementById("card-wrapper");
 const params = new URLSearchParams(location.search)
 const bookId = params.get("book");
 let words = wordData[bookId] ?? [];
@@ -38,9 +35,9 @@ const historyStack = [];
 // });
 
 // カード本体をクリックしてもめくれる（おすすめ）
-// card.addEventListener("click", () => {
-//     card.classList.toggle("flipped");
-// });
+card.addEventListener("click", () => {
+    card.classList.toggle("flipped");
+});
 
 // const params = new URLSearchParams(location.search);
 
@@ -91,7 +88,7 @@ function goNext(direction = "left") {
 
     const isLast = currentIndex >= words.length - 1;
 
-    // slideCards(direction);
+    slideCard(direction);
 
     if (isLast) {
         setTimeout(showCompleteModal, 300);
@@ -99,7 +96,7 @@ function goNext(direction = "left") {
     }
 
     currentIndex++;
-    renderCard(); // ← ここで中身だけ変える
+    renderCard();
 }
 
 
@@ -108,18 +105,8 @@ card.addEventListener("touchend", () => {
     isDragging = false;
 
     const diffX = currentX - startX;
-    const elapsed = Date.now() - startTime;
     const threshold = 80;
 
-    // ===== タップ判定 =====
-    if (!moved && elapsed < 200) {
-        // タップ → めくるだけ
-        card.classList.toggle("flipped");
-        // card.style.transform = "";
-        return;
-    }
-
-    // ===== スワイプ判定 =====
     card.style.transition = "transform 0.3s ease, opacity 0.25s ease";
 
     if (diffX < -threshold) {
@@ -127,36 +114,37 @@ card.addEventListener("touchend", () => {
     } else if (diffX > threshold) {
         swipeOut("right");
     } else {
+        // 元に戻す
         card.style.transform = "";
     }
+
+    startX = 0;
+    currentX = 0;
 });
 
-
-
 function swipeOut(direction) {
-    card.classList.remove("flipped"); // 次カードは表から
-
-    cardWrapper.style.transition = "transform 0.3s ease";
-    cardWrapper.style.transform =
+    // ① 画面外へ飛ばす
+    card.style.transform =
         direction === "left"
             ? "translateX(-120%) rotate(-15deg)"
             : "translateX(120%) rotate(15deg)";
 
+    // ② 少し待って内容を切り替え
     setTimeout(() => {
-        goNext(direction);
+        // transform リセット
+        card.style.transition = "none";
+        card.style.transform = "";
+        card.style.opacity = "0";
 
-        cardWrapper.style.transition = "none";
-        cardWrapper.style.transform = "translateX(0)";
-        cardWrapper.style.opacity = "0";
+        goNext(direction); // index 更新・評価記録
 
+        // ③ フェードイン
         requestAnimationFrame(() => {
-            cardWrapper.style.transition = "opacity 0.25s ease";
-            cardWrapper.style.opacity = "1";
+            card.style.transition = "opacity 0.25s ease";
+            card.style.opacity = "1";
         });
     }, 300);
 }
-
-
 
 
 
@@ -189,15 +177,11 @@ function swipeOut(direction) {
 
 card.addEventListener("touchstart", e => {
     startX = e.touches[0].clientX;
-    currentX = startX;
-    startTime = Date.now();
     isDragging = true;
-    moved = false;
 
+    // アニメーションを一時的に無効化
     card.style.transition = "none";
 }, { passive: true });
-
-
 
 card.addEventListener("touchmove", e => {
     if (!isDragging) return;
@@ -205,15 +189,9 @@ card.addEventListener("touchmove", e => {
     currentX = e.touches[0].clientX;
     const diffX = currentX - startX;
 
-    if (Math.abs(diffX) > 15) { // ★ 5 → 15 に変更
-        moved = true;
-        cardWrapper.style.transform =
-            `translateX(${diffX}px) rotate(${diffX * 0.05}deg)`;
-        // card.style.transform =
-        //     `translateX(${diffX}px) rotate(${diffX * 0.05}deg)`;
-    }
+    // 指の移動に追従
+    card.style.transform = `translateX(${diffX}px) rotate(${diffX * 0.05}deg)`;
 }, { passive: true });
-
 
 
 

@@ -729,10 +729,3 @@ fieldset label {
 .emptyBox {
     height: 1rem;
 }
-
-.card-wrapper {
-    width: 100%;
-    height: 100%;
-    transition: transform 0.3s ease, opacity 0.25s ease;
-    will-change: transform, opacity;
-}
