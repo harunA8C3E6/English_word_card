@@ -96,6 +96,7 @@ function goNext(direction = "left") {
     }
 
     currentIndex++;
+    renderCard(); // ← ここで中身だけ変える
 }
 
 
@@ -104,35 +105,47 @@ card.addEventListener("touchend", () => {
     isDragging = false;
 
     const diffX = currentX - startX;
-    const threshold = 80; // 判定距離（px）
+    const threshold = 80;
 
-    // アニメーション復活
-    card.style.transition = "transform 0.3s ease";
+    card.style.transition = "transform 0.3s ease, opacity 0.25s ease";
 
     if (diffX < -threshold) {
-        // 左スワイプ確定
-        card.style.transform = "translateX(-120%) rotate(-15deg)";
-        setTimeout(() => {
-            card.style.transform = "";
-            goNext("left");
-        }, 300);
-
+        swipeOut("left");
     } else if (diffX > threshold) {
-        // 右スワイプ確定
-        card.style.transform = "translateX(120%) rotate(15deg)";
-        setTimeout(() => {
-            card.style.transform = "";
-            goNext("right");
-        }, 300);
-
+        swipeOut("right");
     } else {
-        // 戻す
+        // 元に戻す
         card.style.transform = "";
     }
 
     startX = 0;
     currentX = 0;
 });
+
+function swipeOut(direction) {
+    // ① 画面外へ飛ばす
+    card.style.transform =
+        direction === "left"
+            ? "translateX(-120%) rotate(-15deg)"
+            : "translateX(120%) rotate(15deg)";
+
+    // ② 少し待って内容を切り替え
+    setTimeout(() => {
+        // transform リセット
+        card.style.transition = "none";
+        card.style.transform = "";
+        card.style.opacity = "0";
+
+        goNext(direction); // index 更新・評価記録
+
+        // ③ フェードイン
+        requestAnimationFrame(() => {
+            card.style.transition = "opacity 0.25s ease";
+            card.style.opacity = "1";
+        });
+    }, 300);
+}
+
 
 
 

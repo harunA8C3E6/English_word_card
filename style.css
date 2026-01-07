@@ -573,8 +573,16 @@ h2 {
     height: 100%;
     position: relative;
     transform-style: preserve-3d;
-    transition: transform 0.6s ease;
+    transition: transform 0.3s ease, opacity 0.25s ease;
     cursor: pointer;
+}
+
+.card.fade-in {
+    opacity: 1;
+}
+
+.card.fade-out {
+    opacity: 0;
 }
 
 /* めくれた状態 */
