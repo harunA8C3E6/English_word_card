@@ -9,6 +9,7 @@ let isDragging = false;
 let moved = false;
 let startTime = 0;
 
+const cardWrapper = document.getElementById("card-wrapper");
 const params = new URLSearchParams(location.search)
 const bookId = params.get("book");
 let words = wordData[bookId] ?? [];
@@ -114,7 +115,7 @@ card.addEventListener("touchend", () => {
     if (!moved && elapsed < 200) {
         // タップ → めくるだけ
         card.classList.toggle("flipped");
-        card.style.transform = "";
+        // card.style.transform = "";
         return;
     }
 
@@ -133,33 +134,28 @@ card.addEventListener("touchend", () => {
 
 
 function swipeOut(direction) {
-    // フリップ解除（重要）
-    card.classList.remove("flipped");
+    card.classList.remove("flipped"); // 次カードは表から
 
-    // ① 画面外へ
-    card.style.transition = "transform 0.3s ease";
-    card.style.transform =
+    cardWrapper.style.transition = "transform 0.3s ease";
+    cardWrapper.style.transform =
         direction === "left"
             ? "translateX(-120%) rotate(-15deg)"
             : "translateX(120%) rotate(15deg)";
 
-    // ② 完全に消えたあと
     setTimeout(() => {
-        // 中身更新
         goNext(direction);
 
-        // ③ 初期状態に戻す（瞬間）
-        card.style.transition = "none";
-        card.style.transform = "translateX(0)";
-        card.style.opacity = "0";
+        cardWrapper.style.transition = "none";
+        cardWrapper.style.transform = "translateX(0)";
+        cardWrapper.style.opacity = "0";
 
-        // ④ フェードイン
         requestAnimationFrame(() => {
-            card.style.transition = "opacity 0.25s ease";
-            card.style.opacity = "1";
+            cardWrapper.style.transition = "opacity 0.25s ease";
+            cardWrapper.style.opacity = "1";
         });
     }, 300);
 }
+
 
 
 
@@ -211,11 +207,12 @@ card.addEventListener("touchmove", e => {
 
     if (Math.abs(diffX) > 15) { // ★ 5 → 15 に変更
         moved = true;
-        card.style.transform =
+        cardWrapper.style.transform =
             `translateX(${diffX}px) rotate(${diffX * 0.05}deg)`;
+        // card.style.transform =
+        //     `translateX(${diffX}px) rotate(${diffX * 0.05}deg)`;
     }
 }, { passive: true });
-
 
 
 
