@@ -133,28 +133,34 @@ card.addEventListener("touchend", () => {
 
 
 function swipeOut(direction) {
-    // ① 画面外へ飛ばす
+    // フリップ解除（重要）
+    card.classList.remove("flipped");
+
+    // ① 画面外へ
+    card.style.transition = "transform 0.3s ease";
     card.style.transform =
         direction === "left"
             ? "translateX(-120%) rotate(-15deg)"
             : "translateX(120%) rotate(15deg)";
 
-    // ② 少し待って内容を切り替え
+    // ② 完全に消えたあと
     setTimeout(() => {
-        // transform リセット
+        // 中身更新
+        goNext(direction);
+
+        // ③ 初期状態に戻す（瞬間）
         card.style.transition = "none";
         card.style.transform = "translateX(0)";
         card.style.opacity = "0";
 
-        goNext(direction); // index 更新・評価記録
-
-        // ③ フェードイン
+        // ④ フェードイン
         requestAnimationFrame(() => {
             card.style.transition = "opacity 0.25s ease";
             card.style.opacity = "1";
         });
     }, 300);
 }
+
 
 
 

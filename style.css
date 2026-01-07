@@ -574,6 +574,7 @@ h2 {
     position: relative;
     transform-style: preserve-3d;
     transition: transform 0.3s ease, opacity 0.25s ease;
+    will-change: transform, opacity;
 }
 
 .card.fade-in {
