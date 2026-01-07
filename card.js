@@ -6,6 +6,7 @@ const card = document.getElementById("card");
 let startX = 0;
 let currentX = 0;
 let isDragging = false;
+let moved = false;
 
 const params = new URLSearchParams(location.search)
 const bookId = params.get("book");
@@ -104,6 +105,12 @@ card.addEventListener("touchend", () => {
     if (!isDragging) return;
     isDragging = false;
 
+    // ★ 動いていない = タップ → 何もしない
+    if (!moved) {
+        card.style.transform = "";
+        return;
+    }
+
     const diffX = currentX - startX;
     const threshold = 80;
 
@@ -114,13 +121,10 @@ card.addEventListener("touchend", () => {
     } else if (diffX > threshold) {
         swipeOut("right");
     } else {
-        // 元に戻す
         card.style.transform = "";
     }
-
-    startX = 0;
-    currentX = 0;
 });
+
 
 function swipeOut(direction) {
     // ① 画面外へ飛ばす
@@ -177,11 +181,13 @@ function swipeOut(direction) {
 
 card.addEventListener("touchstart", e => {
     startX = e.touches[0].clientX;
+    currentX = startX;
     isDragging = true;
+    moved = false;
 
-    // アニメーションを一時的に無効化
     card.style.transition = "none";
 }, { passive: true });
+
 
 card.addEventListener("touchmove", e => {
     if (!isDragging) return;
@@ -189,9 +195,14 @@ card.addEventListener("touchmove", e => {
     currentX = e.touches[0].clientX;
     const diffX = currentX - startX;
 
-    // 指の移動に追従
-    card.style.transform = `translateX(${diffX}px) rotate(${diffX * 0.05}deg)`;
+    if (Math.abs(diffX) > 5) {
+        moved = true; // ★ 少しでも動いたらスワイプ扱い
+    }
+
+    card.style.transform =
+        `translateX(${diffX}px) rotate(${diffX * 0.05}deg)`;
 }, { passive: true });
+
 
 
 
