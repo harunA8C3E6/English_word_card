@@ -88,7 +88,7 @@ function goNext(direction = "left") {
 
     const isLast = currentIndex >= words.length - 1;
 
-    slideCard(direction);
+    // slideCards(direction);
 
     if (isLast) {
         setTimeout(showCompleteModal, 300);
@@ -133,7 +133,7 @@ function swipeOut(direction) {
     setTimeout(() => {
         // transform リセット
         card.style.transition = "none";
-        card.style.transform = "";
+        card.style.transform = "translateX(0)";
         card.style.opacity = "0";
 
         goNext(direction); // index 更新・評価記録
@@ -157,23 +157,23 @@ function swipeOut(direction) {
 // }
 
 // スライド処理
-function slideCard(direction) {
-    card.classList.remove("flipped");
+// function slideCard(direction) {
+//     card.classList.remove("flipped");
 
-    card.classList.add(
-        direction === "left" ? "slide-left" : "slide-right"
-    );
+//     card.classList.add(
+//         direction === "left" ? "slide-left" : "slide-right"
+//     );
 
-    setTimeout(() => {
-        card.classList.add("reset");
-        renderCard();
+//     setTimeout(() => {
+//         card.classList.add("reset");
+//         renderCard();
 
-        // 再描画トリガ
-        card.offsetHeight;
+//         // 再描画トリガ
+//         card.offsetHeight;
 
-        card.classList.remove("slide-left", "slide-right", "reset");
-    }, 300);
-}
+//         card.classList.remove("slide-left", "slide-right", "reset");
+//     }, 300);
+// }
 
 card.addEventListener("touchstart", e => {
     startX = e.touches[0].clientX;
