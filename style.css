@@ -572,6 +572,8 @@ h2 {
     width: 100%;
     height: 100%;
     position: relative;
+    /* ブラウザのスクロールなどと混同しないため */
+    touch-action: none;
     /* 子要素（裏・表）も3D空間として扱うためのコード */
     transform-style: preserve-3d;
     transition: transform 0.3s ease, opacity 0.25s ease;

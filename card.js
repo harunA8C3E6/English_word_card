@@ -40,9 +40,9 @@ const historyStack = [];
     // });
     
     // カード本体をクリックしてもめくれる（おすすめ）
-    card.addEventListener("click", () => {
-        card.classList.toggle("flipped");
-    });
+    // card.addEventListener("click", () => {
+    //     card.classList.toggle("flipped");
+    // });
     
     // const params = new URLSearchParams(location.search);
     
@@ -111,16 +111,21 @@ card.addEventListener("touchend", () => {
     isDragging = false;
 
     const diffX = currentX - startX;
+    // タッチとスワイプの判定距離
+    const touchSwipe = 10;
     // どれだけ動いたら左右に飛ばすのかの値
     const threshold = 80;
 
     // touchmoveでnoneにしていたので元に戻す
     card.style.transition = "transform 0.3s ease, opacity 0.25s ease";
 
+    
     if (diffX < -threshold) {
         swipeOut("left");
     } else if (diffX > threshold) {
         swipeOut("right");
+    } else if (diffX > -touchSwipe && diffX < touchSwipe) {
+        card.classList.toggle("flipped");
     } else {
         // 元に戻す
         card.style.transform = "";
