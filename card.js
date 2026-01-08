@@ -3,12 +3,18 @@ const back = document.getElementById("card-back");
 const flipBtn = document.getElementById("flip-btn");
 const card = document.getElementById("card");
 
+// 指を置いた最初の位置
 let startX = 0;
+// 指を動かしている現在位置
 let currentX = 0;
+// 今ドラッグ中か否か
 let isDragging = false;
 
+// URLの取得
 const params = new URLSearchParams(location.search)
+// URLのbook=の後の値の取得
 const bookId = params.get("book");
+// wordData内のbookIdと一致する単語データの取得。なければから配列を取得
 let words = wordData[bookId] ?? [];
 const from = Number(params.get("from") ?? 1);
 const to = Number(params.get("to") ?? words.length);
@@ -16,7 +22,6 @@ const limit = Number(params.get("limit"));
 const order = params.get("order");
 const rawPos = params.get("pos");
 const posFilter = rawPos ? rawPos.split(",") : [];
-let currentIndex = 0;
 const POS_MAP = {
     verb: "動",
     noun: "名",
@@ -30,20 +35,21 @@ const knownWords = [];  // 右（覚えた）
 const historyStack = [];
 
 // flipBtn.addEventListener("click", () => {
-//     front.classList.toggle("hidden");
-//     back.classList.toggle("hidden");
-// });
-
-// カード本体をクリックしてもめくれる（おすすめ）
-card.addEventListener("click", () => {
-    card.classList.toggle("flipped");
-});
-
-// const params = new URLSearchParams(location.search);
-
-// const words = wordData[bookId] ?? [];
-// let currentIndex = 0;
-
+    //     front.classList.toggle("hidden");
+    //     back.classList.toggle("hidden");
+    // });
+    
+    // カード本体をクリックしてもめくれる（おすすめ）
+    card.addEventListener("click", () => {
+        card.classList.toggle("flipped");
+    });
+    
+    // const params = new URLSearchParams(location.search);
+    
+    // const words = wordData[bookId] ?? [];
+    // let currentIndex = 0;
+    
+let currentIndex = 0;
 function renderCard() {
     const word = words[currentIndex];
     if (!word) return;
@@ -105,8 +111,10 @@ card.addEventListener("touchend", () => {
     isDragging = false;
 
     const diffX = currentX - startX;
+    // どれだけ動いたら左右に飛ばすのかの値
     const threshold = 80;
 
+    // touchmoveでnoneにしていたので元に戻す
     card.style.transition = "transform 0.3s ease, opacity 0.25s ease";
 
     if (diffX < -threshold) {
@@ -143,7 +151,7 @@ function swipeOut(direction) {
             card.style.transition = "opacity 0.25s ease";
             card.style.opacity = "1";
         });
-    }, 300);
+    }, 300); //何ms待つのか設定
 }
 
 
