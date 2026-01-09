@@ -33,9 +33,9 @@ const wordData = {
 
     system: [
         { id: "system1", en: "follow", ja: [ { pos: "動", meaning: "～（の後）に続く" }, { pos: "動", meaning: "〈指示・方針など〉に従う" } ],
-            example: { en: "consider the problem seriously", ja: "真剣にその問題を考える"}},
-        { id: "system2", en: "consider", ja: [ { pos: "動", meaning: "～を考慮する" } ],
             example: { en: "follow her advice", ja: "彼女の助言に従う"}},
+        { id: "system2", en: "consider", ja: [ { pos: "動", meaning: "～を考慮する" } ],
+            example: { en: "consider the problem seriously", ja: "真剣にその問題を考える"}},
         { id: "system3", en: "increase", ja: [ { pos: "動", meaning: "増える" }, { pos: "動", meaning: "～を増やす" } ] },
         { id: "system4", en: "expect", ja: [ { pos: "動", meaning: "～を予期する" } ] },
         { id: "system5", en: "decide", ja: [ { pos: "動", meaning: "～することを決意する" } ] },

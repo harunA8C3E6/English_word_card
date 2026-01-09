@@ -256,10 +256,7 @@ function renderWords() {
                 <span class="word-en">${word.en}</span>
                 <button class="speak-btn button-text" data-word="${word.en}">🔊 再生</button>
                 <button class="example-btn button-text">例文</button>
-                
-                <button class="tag-edit-btn button-text">
-                タグ設定
-                </button>
+                <button class="tag-edit-btn button-text">タグ設定</button>
             </div>
             <div class="word-ja-area">
                 <div class="ja-text">${renderJapanese(word)}</div>
@@ -547,15 +544,19 @@ tagModal.querySelector(".modal-tag-content").onclick = e => {
 
 // ===== 1つ前のページに戻るボタン =====
 const prevBtn = document.getElementById("prev-page-btn");
-if (prevBtn) {
-    prevBtn.onclick = () => {
-        if (history.length > 1) {
-            history.back();
-        } else {
-            location.href = "index.html";
-        }
-    };
-}
+prevBtn.onclick = () => {
+    const from = Number(urlParams.get("from") || 1);
+    const to = Number(urlParams.get("to") || 10);
+    const bookKey = urlParams.get("book");
+
+    if (params.has("tag")) {
+        // タグ学習ページから来た場合
+        location.href = "tags.html";
+    } else {
+        // 通常の単語帳から来た場合
+        location.href = "index.html";
+    }
+};
 
 // ===== 品詞チェックボックスの設定 =====
 document.querySelectorAll("#pos-filter input").forEach(cb => {

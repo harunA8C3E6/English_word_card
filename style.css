@@ -550,7 +550,7 @@ h2 {
 } */
 
 #card {
-    margin: 40px auto;
+    margin: 0px auto;
     padding: 30px;
     max-width: 300px;
     text-align: center;
@@ -563,7 +563,7 @@ h2 {
 .card-container {
     perspective: 1000px;   /* 奥行き */
     width: 350px;
-    height: 250px;
+    height: 278px;
     margin: 10px auto;
 }
 
@@ -794,4 +794,18 @@ fieldset label {
 .center {
     align-items: center;
     text-align: center;
+}
+
+.cardWithBunnons {
+    /* position: relative; */
+    display: flex;
+    flex-direction: column;
+}
+
+.buttonsInCard {
+    /* position: absolute; */
+    display: block;
+    /* left: 0; */
+    bottom: 0;
+    margin: 5px;
 }

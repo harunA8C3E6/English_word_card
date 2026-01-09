@@ -1,14 +1,12 @@
-// 必要要素の定義
-// const card = document.getElementById("card");
-
-
-
 // ===============================
 // DOM取得
 // ===============================
 const card = document.getElementById("card");
+const speakBtn = document.getElementById("speak-btn");
 const front = document.getElementById("card-front");
 const back = document.getElementById("card-back");
+const onCard = document.getElementById("soundEtc");
+let displayedIndex = 0;
 
 const dontKnowBtn = document.getElementById("dontknow-btn");
 const knownBtn = document.getElementById("known-btn");
@@ -85,7 +83,17 @@ function renderCard() {
     const word = words[currentIndex];
     if (!word) return;
 
-    front.textContent = word.en;
+    onCard.innerHTML = `
+        <div class="buttonsInCard">
+            <button id="speak-btn" class="speak-btn button-text" data-word="${word.en}">🔊 再生</button>
+            <button class="example-btn button-text" data-index="${currentIndex}">例文</button>
+            <button class="tag-edit-btn button-text">タグ設定</button>
+        </div>
+    `
+
+    console.log(currentIndex);
+
+    front.textContent = word.en
 
     if (Array.isArray(word.ja)) {
         back.innerHTML = word.ja
@@ -204,6 +212,8 @@ function updateProgress() {
     const bar = document.getElementById("progress-bar");
     bar.max = words.length;
     bar.value = currentIndex + 1;
+
+    console.log(currentIndex);
 }
 
 function updateSwipeCounter() {
@@ -313,3 +323,163 @@ if (words.length === 0) {
 } else {
     renderCard();
 }
+
+// ===============================
+// 音声・例文・タグ設定
+// ===============================
+onCard.addEventListener("click", (e) => {
+    const btn = e.target.closest(".speak-btn");
+    if (!btn) return;
+
+    e.stopPropagation();
+    const wordEn = btn.dataset.word;
+    speak(wordEn);
+});
+function speak(text) {
+    if (!("speechSynthesis" in window)) {
+        alert("このブラウザは音声読み上げに対応していません");
+        return;
+    }
+
+    // 既に再生中なら止める
+    speechSynthesis.cancel();
+
+    const uttr = new SpeechSynthesisUtterance(text);
+    uttr.lang = "en-US";   // 英語
+    uttr.rate = 1.0;      // 速度
+    uttr.pitch = 1.0;     // 音の高さ
+
+    speechSynthesis.speak(uttr);
+}
+
+const exampleModal = document.getElementById("example-modal");
+const exampleEn = document.querySelector(".example-en");
+const exampleJa = document.querySelector(".example-ja");
+const closeModalBtn = document.getElementById("close-modal");
+const toggleJaBtn = document.getElementById("toggle-ja");
+const playAudioBtn = document.getElementById("play-audio");
+onCard.addEventListener("click", (e) => {
+    const exampleBtn = e.target.closest(".example-btn");
+    if (!exampleBtn) return;
+
+    e.stopPropagation();
+
+    const index = Number(exampleBtn.dataset.index);
+    const word = words[index];
+
+    if (!word || !word.example) {
+        alert("例文がありません");
+        return;
+    }
+
+    exampleEn.textContent = word.example.en;
+    exampleJa.textContent = word.example.ja;
+    exampleJa.classList.add("modal-hidden");
+
+    exampleModal.classList.remove("modal-hidden");
+});
+closeModalBtn.addEventListener("click", () => {
+    exampleModal.classList.add("modal-hidden");
+});
+toggleJaBtn.addEventListener("click", () => {
+    exampleJa.classList.toggle("modal-hidden");
+});
+playAudioBtn.addEventListener("click", () => {
+    const text = exampleEn.textContent;
+    if (text) speak(text);
+});
+
+onCard.addEventListener("click", (e) => {
+    const tagBtn = e.target.closest(".tag-edit-btn");
+    if (!tagBtn) return;
+
+    e.stopPropagation();
+    openTagModal();
+});
+
+// ===============================
+// タグ設定モーダル
+// ===============================
+const tagModal = document.getElementById("tag-modal");
+const tagModalTitle = document.getElementById("tag-modal-title");
+const tagCheckboxArea = document.getElementById("tag-checkbox-area");
+const tagSaveBtn = document.getElementById("tag-save-btn");
+const tagCloseBtn = document.getElementById("tag-close-btn");
+
+let currentWordId = null;
+
+let wordTags = loadJSON("wordTags", {});
+let tags = loadJSON("tags", {});
+
+function loadJSON(key, defaultValue) {
+    try {
+        return JSON.parse(localStorage.getItem(key)) ?? defaultValue;
+    } catch {
+        return defaultValue;
+    }
+}
+
+// タグ編集ボタンクリック
+onCard.addEventListener("click", (e) => {
+    const tagBtn = e.target.closest(".tag-edit-btn");
+    if (!tagBtn) return;
+
+    e.stopPropagation();
+    
+    const word = words[currentIndex];
+    if (!word) return;
+    
+    openTagModal(word);
+});
+
+function openTagModal(word) {
+    currentWordId = word.id;
+
+    tagModalTitle.textContent = `${word.en} のタグ設定`;
+    tagCheckboxArea.innerHTML = "";
+
+    const currentTags = wordTags[word.id] ?? [];
+
+    Object.entries(tags).forEach(([tagId, tag]) => {
+        const checked = currentTags.includes(tagId) ? "checked" : "";
+
+        tagCheckboxArea.innerHTML += `
+            <label>
+                <input type="checkbox" value="${tagId}" ${checked}>
+                ${tag.name}
+            </label>
+        `;
+    });
+
+    tagModal.classList.remove("modal-hidden");
+}
+
+function closeTagModal() {
+    tagModal.classList.add("modal-hidden");
+    currentWordId = null;
+}
+
+// 保存ボタン
+tagSaveBtn.onclick = () => {
+    const selected = [];
+
+    tagCheckboxArea
+        .querySelectorAll("input[type='checkbox']:checked")
+        .forEach(cb => {
+            selected.push(cb.value);
+        });
+
+    wordTags[currentWordId] = selected;
+    localStorage.setItem("wordTags", JSON.stringify(wordTags));
+
+    closeTagModal();
+};
+
+// 閉じるボタン
+tagCloseBtn.onclick = closeTagModal;
+
+// モーダル背景クリックで閉じる
+tagModal.onclick = closeTagModal;
+tagModal.querySelector(".modal-tag-content").onclick = e => {
+    e.stopPropagation();
+};
