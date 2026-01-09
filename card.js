@@ -105,6 +105,23 @@ function goNext(direction = "left") {
     renderCard();
 }
 
+card.addEventListener("touchstart", e => {
+    startX = e.touches[0].clientX;
+    isDragging = true;
+
+    // アニメーションを一時的に無効化
+    card.style.transition = "none";
+}, { passive: true });
+
+card.addEventListener("touchmove", e => {
+    if (!isDragging) return;
+
+    currentX = e.touches[0].clientX;
+    const diffX = currentX - startX;
+
+    // 指の移動に追従
+    card.style.transform = `translateX(${diffX}px) rotate(${diffX * 0.05}deg)`;
+}, { passive: true });
 
 card.addEventListener("touchend", () => {
     if (!isDragging) return;
@@ -118,10 +135,12 @@ card.addEventListener("touchend", () => {
 
     // touchmoveでnoneにしていたので元に戻す
     card.style.transition = "transform 0.3s ease, opacity 0.25s ease";
-
     
-    if (diffX > -touchSwipe && diffX < touchSwipe) {
+    
+    if (Math.abs(diffX) < touchSwipe) {
         card.classList.toggle("flipped");
+        // 元に戻す
+        card.style.transform = "";
     } else if (diffX > threshold) {
         swipeOut("right");
     } else if (diffX < -threshold) {
@@ -188,23 +207,6 @@ function swipeOut(direction) {
 //     }, 300);
 // }
 
-card.addEventListener("touchstart", e => {
-    startX = e.touches[0].clientX;
-    isDragging = true;
-
-    // アニメーションを一時的に無効化
-    card.style.transition = "none";
-}, { passive: true });
-
-card.addEventListener("touchmove", e => {
-    if (!isDragging) return;
-
-    currentX = e.touches[0].clientX;
-    const diffX = currentX - startX;
-
-    // 指の移動に追従
-    card.style.transform = `translateX(${diffX}px) rotate(${diffX * 0.05}deg)`;
-}, { passive: true });
 
 
 
