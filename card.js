@@ -37,18 +37,18 @@ const historyStack = [];
 // flipBtn.addEventListener("click", () => {
     //     front.classList.toggle("hidden");
     //     back.classList.toggle("hidden");
-    // });
-    
-    // カード本体をクリックしてもめくれる（おすすめ）
-    // card.addEventListener("click", () => {
-    //     card.classList.toggle("flipped");
-    // });
-    
-    // const params = new URLSearchParams(location.search);
-    
-    // const words = wordData[bookId] ?? [];
-    // let currentIndex = 0;
-    
+// });
+
+// カード本体をクリックしてもめくれる（おすすめ）
+// card.addEventListener("click", () => {
+    // card.classList.toggle("flipped");
+// });
+
+// const params = new URLSearchParams(location.search);
+
+// const words = wordData[bookId] ?? [];
+// let currentIndex = 0;
+
 let currentIndex = 0;
 function renderCard() {
     const word = words[currentIndex];
@@ -120,12 +120,12 @@ card.addEventListener("touchend", () => {
     card.style.transition = "transform 0.3s ease, opacity 0.25s ease";
 
     
-    if (diffX < -threshold) {
-        swipeOut("left");
+    if (diffX > -touchSwipe && diffX < touchSwipe) {
+        card.classList.toggle("flipped");
     } else if (diffX > threshold) {
         swipeOut("right");
-    } else if (diffX > -touchSwipe && diffX < touchSwipe) {
-        card.classList.toggle("flipped");
+    } else if (diffX < -threshold) {
+        swipeOut("left");
     } else {
         // 元に戻す
         card.style.transform = "";
