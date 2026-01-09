@@ -149,12 +149,13 @@ function slideOut(direction) {
     setTimeout(() => {
         card.style.transition = "none";
         card.style.transform = "";
-        card.style.opacity = "1";
+        card.style.opacity = "0";
 
         goNext(direction);
 
         requestAnimationFrame(() => {
             card.style.transition = "transform 0.3s ease, opacity 0.25s ease";
+            card.style.opacity = "1"
         });
 
         isAnimating = false;
@@ -223,6 +224,42 @@ function showCompleteModal() {
     document
         .getElementById("complete-modal")
         .classList.remove("modal-hidden");
+}
+
+// 再学習用ボタン
+document.getElementById("restart-review").addEventListener("click", () => {
+    if (reviewWords.length === 0) {
+        alert("要復習の単語はありません");
+        return;
+    }
+
+    words = [...reviewWords]; // コピー重要
+    reviewWords.length = 0;
+    knownWords.length = 0;
+    currentIndex = 0;
+
+    document.getElementById("complete-modal")
+        .classList.add("modal-hidden");
+
+    renderCard();
+    clearChart();
+    resetSwipeCounter();
+});
+
+// モーダルを閉じる
+document.getElementById("result-close").onclick = () => {
+    location.href =`study.html?book=${bookId}`
+}
+
+function clearChart() {
+    const canvas = document.getElementById("result-chart");
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function resetSwipeCounter() {
+    document.getElementById("review-count-live").textContent = 0;
+    document.getElementById("known-count-live").textContent = 0;
 }
 
 // ===============================

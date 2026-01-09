@@ -10,21 +10,25 @@
 
 <header class="header">
     <button onclick="history.back()" class="prev-page-btn">←</button>
-    <h1>カード学習a</h1>
+    <h1>カード学習</h1>
 </header>
 
 <!-- 結果表示モーダル -->
 <div id="complete-modal" class="modal modal-hidden">
     <div class="modal-tag-content">
         <h2>学習完了 🎉</h2>
-        
-        <canvas id="result-chart" width="200" height="200"></canvas>
-        <p>総単語数：<span id="total-count"></span></p>
-        <p>覚えた：<span id="known-count"></span></p>
-        <p>要復習：<span id="review-count"></span></p>
 
-        <button id="restart-review">要復習のみ再学習</button>
-        <button id="result-close">戻る</button>
+        <div class="modal-body">
+            <div class="center"><canvas id="result-chart" width="200" height="200"></canvas></div>
+            <p>総単語数：<span id="total-count"></span></p>
+            <!-- <div id="swipe-counter2"> -->
+            <p class="review">覚えた：<span id="known-count"></span></p>
+            <p class="known">要復習：<span id="review-count"></span></p>
+            <!-- </div> -->
+
+            <button id="restart-review" class="button-text">要復習のみ再学習</button>
+            <button id="result-close" class="button-text">戻る</button>
+        </div>
     </div>
 </div>
 
@@ -51,8 +55,8 @@
     </div>
 
     <div class="know-dontknow-btn">
-        <button id="dontknow-btn" class="button-text">← 要復習</button>
-        <button id="known-btn" class="button-text">覚えた →</button>
+        <button id="dontknow-btn" class="bigBtn">← 要復習</button>
+        <button id="known-btn" class="bigBtn">覚えた →</button>
     </div>
 
     <!-- <button id="flip-btn" class="button-text"></button> -->

@@ -1274,6 +1274,16 @@ const cardModal = document.getElementById("card-setting-modal");
 
 openBtn.addEventListener("click", () => {
     cardModal.classList.remove("modal-hidden");
+    const maxWordCount = words.length;
+    const to = document.getElementById("range-to");
+
+    // from.value = 1;
+    to.value = maxWordCount;
+
+    // from.max = maxWordCount;
+    to.max = maxWordCount;
+
+    cardModal.classList.remove("modal-hidden");
 });
 
 closeBtn.addEventListener("click", () => {

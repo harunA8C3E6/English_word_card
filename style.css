@@ -701,6 +701,20 @@ h2 {
 #swipe-counter .known {
     color: #4caf50;
 }
+/* #swipe-counter2 {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 8px;
+} */
+.modal-body .review {
+    color: #f44336;
+}
+
+.modal-body .known {
+    color: #4caf50;
+}
 
 
 /* .slide-left {
@@ -728,8 +742,23 @@ h2 {
 .know-dontknow-btn {
     display: flex;
     justify-content: center;
-    gap: 20px;
+    gap: 10px;
     margin-top: 20px;
+    margin-left: 10px;
+}
+
+.bigBtn {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+    color: #DDDDDD;
+    /* padding-left: 5px;
+    padding-right: 5px;
+    padding-bottom: 3px; */
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+    height: 50px;
+    width: 175px;
 }
 
 .numberBox {
@@ -760,4 +789,9 @@ fieldset label {
 
 .emptyBox {
     height: 1rem;
+}
+
+.center {
+    align-items: center;
+    text-align: center;
 }
