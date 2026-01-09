@@ -1,15 +1,11 @@
 // 必要要素の定義
 // const card = document.getElementById("card");
 
-// card.addEventListener("click", () => {
-//     card.classList.toggle("flipped");
-// });
 
 
-
-/* =========================
-    DOM取得
-========================= */
+// ===============================
+// DOM取得
+// ===============================
 const card = document.getElementById("card");
 const front = document.getElementById("card-front");
 const back = document.getElementById("card-back");
@@ -18,9 +14,16 @@ const dontKnowBtn = document.getElementById("dontknow-btn");
 const knownBtn = document.getElementById("known-btn");
 const undoBtn = document.getElementById("undo-btn");
 
-/* =========================
-    URLパラメータ取得
-========================= */
+console.log("card:", card);
+console.log("front:", front);
+console.log("back:", back);
+
+card.addEventListener("click", () => {
+    card.classList.toggle("flipped");
+});
+// ===============================
+// URL パラメータ
+// ===============================
 const params = new URLSearchParams(location.search);
 const bookId = params.get("book");
 
@@ -28,13 +31,14 @@ const from = Number(params.get("from") ?? 1);
 const to = Number(params.get("to"));
 const limit = Number(params.get("limit"));
 const order = params.get("order");
-
 const rawPos = params.get("pos");
 const posFilter = rawPos ? rawPos.split(",") : [];
 
-/* =========================
-    品詞マップ
-========================= */
+// ===============================
+// 単語データ取得
+// ===============================
+let words = wordData[bookId] ?? [];
+
 const POS_MAP = {
     verb: "動",
     noun: "名",
@@ -43,11 +47,9 @@ const POS_MAP = {
     other: "その他"
 };
 
-/* =========================
-    単語データ準備
-========================= */
-let words = wordData[bookId] ?? [];
-
+// ===============================
+// 出題配列の加工
+// ===============================
 let filteredWords = words
     .slice(from - 1, to || words.length)
     .filter(w => {
@@ -66,22 +68,19 @@ if (limit && limit < filteredWords.length) {
 
 words = filteredWords;
 
-/* =========================
-    状態管理
-========================= */
+// ===============================
+// 状態管理
+// ===============================
 let currentIndex = 0;
-let isDragging = false;
-let startX = 0;
-let currentX = 0;
-let isAnimating = false;
-
 const reviewWords = [];
 const knownWords = [];
 const historyStack = [];
 
-/* =========================
-    カード描画
-========================= */
+let isAnimating = false;
+
+// ===============================
+// カード描画
+// ===============================
 function renderCard() {
     const word = words[currentIndex];
     if (!word) return;
@@ -99,14 +98,18 @@ function renderCard() {
     updateProgress();
 }
 
-/* =========================
-    次のカードへ
-========================= */
+// ===============================
+// 次のカードへ（評価記録）
+// ===============================
 function goNext(direction) {
     const word = words[currentIndex];
     if (!word) return;
 
-    historyStack.push({ index: currentIndex, direction, word });
+    historyStack.push({
+        index: currentIndex,
+        direction,
+        word
+    });
 
     if (direction === "left") {
         reviewWords.push(word);
@@ -127,10 +130,10 @@ function goNext(direction) {
     renderCard();
 }
 
-/* =========================
-    スワイプアウト処理
-========================= */
-function swipeOut(direction) {
+// ===============================
+// カードを飛ばすアニメーション
+// ===============================
+function slideOut(direction) {
     if (isAnimating) return;
     isAnimating = true;
 
@@ -158,56 +161,20 @@ function swipeOut(direction) {
     }, 300);
 }
 
-/* =========================
-    タッチ操作
-========================= */
-card.addEventListener("touchstart", e => {
-    startX = e.touches[0].clientX;
-    isDragging = true;
-    card.style.transition = "none";
-}, { passive: true });
-
-card.addEventListener("touchmove", e => {
-    if (!isDragging) return;
-    currentX = e.touches[0].clientX;
-    const diffX = currentX - startX;
-    card.style.transform = `translateX(${diffX}px) rotate(${diffX * 0.05}deg)`;
-}, { passive: true });
-
-card.addEventListener("touchend", () => {
-    if (!isDragging) return;
-    isDragging = false;
-
-    const diffX = currentX - startX;
-    const threshold = 80;
-    const tapRange = 10;
-
-    card.style.transition = "transform 0.3s ease";
-
-    if (Math.abs(diffX) < tapRange) {
-        card.classList.toggle("flipped");
-        card.style.transform = "";
-    } else if (diffX > threshold) {
-        swipeOut("right");
-    } else if (diffX < -threshold) {
-        swipeOut("left");
-    } else {
-        card.style.transform = "";
-    }
-
-    startX = 0;
-    currentX = 0;
+// ===============================
+// ボタン操作
+// ===============================
+dontKnowBtn.addEventListener("click", () => {
+    slideOut("left");   // 要復習
 });
 
-/* =========================
-    ボタン操作
-========================= */
-dontKnowBtn.addEventListener("click", () => swipeOut("left"));
-knownBtn.addEventListener("click", () => swipeOut("right"));
+knownBtn.addEventListener("click", () => {
+    slideOut("right");  // 覚えた
+});
 
-/* =========================
-    Undo
-========================= */
+// ===============================
+// ひとつ前に戻る
+// ===============================
 function undoLastAction() {
     if (historyStack.length === 0) return;
 
@@ -221,15 +188,14 @@ function undoLastAction() {
     }
 
     updateSwipeCounter();
-    card.classList.remove("flipped");
     renderCard();
 }
 
 undoBtn.addEventListener("click", undoLastAction);
 
-/* =========================
-    UI更新
-========================= */
+// ===============================
+// 進捗表示
+// ===============================
 function updateProgress() {
     document.getElementById("current-index").textContent = currentIndex + 1;
     document.getElementById("total-count-card").textContent = words.length;
@@ -244,9 +210,66 @@ function updateSwipeCounter() {
     document.getElementById("known-count-live").textContent = knownWords.length;
 }
 
-/* =========================
-    初期表示
-========================= */
+// ===============================
+// 完了モーダル
+// ===============================
+function showCompleteModal() {
+    document.getElementById("total-count").textContent = words.length;
+    document.getElementById("known-count").textContent = knownWords.length;
+    document.getElementById("review-count").textContent = reviewWords.length;
+
+    drawResultChart(knownWords.length, reviewWords.length);
+
+    document
+        .getElementById("complete-modal")
+        .classList.remove("modal-hidden");
+}
+
+// ===============================
+// 円グラフ
+// ===============================
+function drawResultChart(known, review) {
+    const canvas = document.getElementById("result-chart");
+    const ctx = canvas.getContext("2d");
+
+    const total = known + review;
+    if (total === 0) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    const r = canvas.width / 2 - 10;
+
+    let start = -Math.PI / 2;
+
+    const knownAngle = (known / total) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, start, start + knownAngle);
+    ctx.fillStyle = "#4caf50";
+    ctx.fill();
+
+    start += knownAngle;
+
+    const reviewAngle = (review / total) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, start, start + reviewAngle);
+    ctx.fillStyle = "#f44336";
+    ctx.fill();
+
+    const accuracy = Math.round((known / total) * 100);
+    ctx.fillStyle = "#333";
+    ctx.font = "bold 26px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(`${accuracy}%`, cx, cy);
+}
+
+// ===============================
+// 初期表示
+// ===============================
 if (words.length === 0) {
     front.textContent = "対象の単語がありません";
     back.textContent = "";
