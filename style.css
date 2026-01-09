@@ -562,7 +562,7 @@ h2 {
 /* ===== カード全体 ===== */
 .card-container {
     perspective: 1000px;   /* 奥行き */
-    width: 400px;
+    width: 350px;
     height: 250px;
     margin: 10px auto;
 }
@@ -571,7 +571,7 @@ h2 {
 .card {
     /* display: block; */
     position: relative;
-    width: 100%;
+    width: 350px;
     height: 200px;
     /* ブラウザのスクロールなどと混同しないため */
     touch-action: none;
