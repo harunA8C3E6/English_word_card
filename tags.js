@@ -123,12 +123,6 @@ document.getElementById("tag-restart").onclick = () => {
 
 // ===== 1つ前のページに戻るボタン =====
 const prevBtn = document.getElementById("prev-page-btn");
-if (prevBtn) {
-    prevBtn.onclick = () => {
-        if (history.length > 1) {
-            history.back();
-        } else {
-            location.href = "index.html";
-        }
-    };
-}
+prevBtn.onclick = () => {
+    location.href = "index.html"
+};

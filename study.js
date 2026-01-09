@@ -740,6 +740,14 @@ const closecardModalBtn = document.getElementById("card-study-close");
 
 openTestModalBtn.onclick = () => {
     testModal.classList.remove("modal-hidden");
+    const maxWordCount = words.length;
+    const to = document.getElementById("range-end");
+
+    // from.value = 1;
+    to.value = maxWordCount;
+
+    // from.max = maxWordCount;
+    to.max = maxWordCount;
 };
 
 document.getElementById("test-maker-close").onclick = () => {
@@ -845,10 +853,10 @@ document.getElementById("create-test-btn").onclick = () => {
     for (let i = 0; i < options.testCount; i++) {
         const testWords = shuffleArray(baseWords).slice(0, 50);
 
-        if (testWords.length < 50) {
-            alert("単語数が不足しています");
-            return;
-        }
+        // if (testWords.length < 50) {
+        //     alert("単語数が不足しています");
+        //     return;
+        // }
 
         allTests.push(testWords);
     }
@@ -857,7 +865,8 @@ document.getElementById("create-test-btn").onclick = () => {
 };
 // テスト作成ボタン終了
 
-document.getElementById("range-end").value = wordData.system.length;
+// document.getElementById("range-end").value = wordData.system.length;
+// ここ！
 
 function drawTable(doc, words, showAnswer = false) {
     const startY = 30;
@@ -1284,7 +1293,7 @@ openBtn.addEventListener("click", () => {
     // from.max = maxWordCount;
     to.max = maxWordCount;
 
-    cardModal.classList.remove("modal-hidden");
+    // cardModal.classList.remove("modal-hidden");
 });
 
 closeBtn.addEventListener("click", () => {
