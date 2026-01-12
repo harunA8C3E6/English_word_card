@@ -108,21 +108,25 @@ Object.entries(tags).forEach(([tagId, tag]) => {
     tagListEl.appendChild(li);
 });
 
-document.getElementById("tag-restart").onclick = () => {
-    if (!confirm("タグを初期化します。よろしいですか？")) return;
-    const tags = {};
+// document.getElementById("tag-restart").onclick = () => {
+//     if (!confirm("タグを初期化します。よろしいですか？")) return;
+//     const tags = {};
 
-    for (let i = 1; i <= 50; i++) {
-        tags[`タグ${i}`] = { name: `タグ${i}` };
-    }
+//     for (let i = 1; i <= 50; i++) {
+//         tags[`タグ${i}`] = { name: `タグ${i}` };
+//     }
 
-    localStorage.setItem("tags", JSON.stringify(tags));
+//     localStorage.setItem("tags", JSON.stringify(tags));
 
-    alert("タグを初期化しました");
-};
+//     alert("タグを初期化しました");
+// };
 
 // ===== 1つ前のページに戻るボタン =====
-const prevBtn = document.getElementById("prev-page-btn");
-prevBtn.onclick = () => {
-    location.href = "index.html"
+// const prevBtn = document.getElementById("prev-page-btn");
+// prevBtn.onclick = () => {
+//     location.href = "index.html"
+// };
+
+document.getElementById("prev-page-btn").onclick = () => {
+    location.href = "index.html";
 };
