@@ -22,8 +22,8 @@
             <div class="center"><canvas id="result-chart" width="200" height="200"></canvas></div>
             <p>総単語数：<span id="total-count"></span></p>
             <!-- <div id="swipe-counter2"> -->
-            <p class="review">覚えた：<span id="known-count"></span></p>
-            <p class="known">要復習：<span id="review-count"></span></p>
+            <p class="known">覚えた：<span id="known-count"></span></p>
+            <p class="review">要復習：<span id="review-count"></span></p>
             <!-- </div> -->
 
             <button id="restart-review" class="button-text">要復習のみ再学習</button>
@@ -53,6 +53,32 @@
         <div class="modal-buttons">
             <button id="tag-save-btn" class="prev-btn">保存</button>
             <button id="tag-close-btn" class="prev-btn">閉じる</button>
+        </div>
+    </div>
+</div>
+<!-- メモモーダル -->
+<div id="memo-modal" class="modal modal-hidden">
+    <div class="modal-tag-content">
+        <h3 id="memo-modal-title">メモ</h3>
+        <!-- 閲覧用 -->
+        <div id="memo-view" class="memo-view"></div>
+        <!-- 編集用 -->
+
+        <div class="modal-body">
+            <textarea
+                id="memo-textarea"
+                rows="6"
+                style="width:100%;"
+                placeholder="この単語のメモを書いてください"
+                class="textbox"
+            ></textarea>
+        </div>
+
+        <div class="modal-buttons">
+            <button id="memo-edit-btn" class="prev-btn">編集</button>
+            <button id="memo-save-btn" class="prev-btn modal-hidden">保存</button>
+            <button id="memo-cancel-btn" class="prev-btn modal-hidden">キャンセル</button>
+            <button id="memo-close-btn" class="prev-btn">閉じる</button>
         </div>
     </div>
 </div>

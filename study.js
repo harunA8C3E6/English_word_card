@@ -12,6 +12,8 @@ const urlParams = new URLSearchParams(location.search);
 const POS_FILTER_KEY = "posFilter";
 const ALL_POS = ["動", "名", "形", "副", "その他"];
 
+const OTHER_POS = ["前", "接", "助"];
+
 let activePosSet = new Set(ALL_POS);
 
 function loadPosFilter() {
@@ -85,6 +87,12 @@ function loadJSON(key, defaultValue) {
 
 let wordTags = loadJSON("wordTags", {});
 let tags = loadJSON("tags", {});
+
+// メモ用
+const MEMO_KEY = "wordMemos";
+
+let wordMemos = loadJSON(MEMO_KEY, {});
+let currentMemoWordId = null;
 
 
 
@@ -257,6 +265,7 @@ function renderWords() {
                 <button class="speak-btn button-text" data-word="${word.en}">🔊 再生</button>
                 <button class="example-btn button-text">例文</button>
                 <button class="tag-edit-btn button-text">タグ設定</button>
+                <button class="memo-btn button-text">メモ</button>
             </div>
             <div class="word-ja-area">
                 <div class="ja-text">${renderJapanese(word)}</div>
@@ -320,6 +329,19 @@ function renderWords() {
         li.querySelector(".tag-edit-btn").onclick = () => {
             openTagModal(word);
         };
+
+        // メモ用
+        li.querySelector(".memo-btn").onclick = () => {
+            openMemoModal(word);
+        };
+
+        const memoBtn = li.querySelector(".memo-btn");
+
+        const memo = wordMemos[word.id];
+        if (memo && memo.trim() !== "") {
+            memoBtn.classList.add("has-memo");
+        }
+
     });
 
     const totalPages = Math.ceil(filteredWords.length / WORDS_PER_PAGE);
@@ -378,8 +400,19 @@ function renderWords() {
         // 単語が持つ品詞一覧
         const wordPosList = word.ja.map(item => item.pos);
 
+        return wordPosList.some(pos => {
+        // 直接一致する場合
+        if (activePosSet.has(pos)) return true;
+        
+        // 「その他」が選択されていて、かつ前・接・助のいずれかの場合
+        if (activePosSet.has("その他") && OTHER_POS.includes(pos)) {
+            return true;
+        }
+        return false;
+    });
+
         // 選択中の品詞と1つでも一致すればOK
-        return wordPosList.some(pos => activePosSet.has(pos));
+        // return wordPosList.some(pos => activePosSet.has(pos));
     }
     
     if (activePosSet.size === 0) {
@@ -695,10 +728,27 @@ function makeTestTitle(baseTitle, options) {
 //     doc.setFont("NotoSansJP");
 // }
 
+// function filterWordsByPos(words, posSet) {
+//     return words.filter(word =>
+//         word.ja.some(j => posSet.has(j.pos))
+//     );
+// }
 function filterWordsByPos(words, posSet) {
-    return words.filter(word =>
-        word.ja.some(j => posSet.has(j.pos))
-    );
+    return words.filter(word => {
+        if (!Array.isArray(word.ja)) return true;
+        
+        return word.ja.some(j => {
+            // 直接一致
+            if (posSet.has(j.pos)) return true;
+            
+            // 「その他」が選択されていて、かつ前・接・助のいずれか
+            if (posSet.has("その他") && OTHER_POS.includes(j.pos)) {
+                return true;
+            }
+            
+            return false;
+        });
+    });
 }
 
 function sortWords(words, order) {
@@ -802,6 +852,8 @@ function getTestOptions() {
             .map(cb => cb.value)
     );
 
+    console.log("選択された品詞:", [...posSet]);
+
     const range = getRangeOptions();
     const testCount = getTestCount();
 
@@ -832,8 +884,13 @@ function getTestOptions() {
 document.getElementById("create-test-btn").onclick = () => {
     const options = getTestOptions();
 
+    console.log("テストオプション:", options);
+    console.log("品詞セット:", [...options.posSet]);
+
     // 範囲＋品詞で絞り込んだ「母集団」
     const baseWords = getWordsByRangeAndPos(options);
+
+    console.log("絞り込み後の単語数:", baseWords.length);
 
     if (baseWords.length === 0) {
         alert("条件に合う単語がありません");
@@ -1057,22 +1114,25 @@ function splitIntoChunks(array, chunkSize = 50) {
 
 function getWordsByRangeAndPos(options) {
     const { range, posSet } = options;
-    const start = Number(range.start);
-    const end = Number(range.end);
+    const baseWords = getBaseWords();
 
-    const allWords = words;
-
-    return allWords.filter((word, index) => {
+    return baseWords.filter((word, index) => {
         const wordNumber = index + 1;
 
-        // 範囲チェック
         if (wordNumber < range.start || wordNumber > range.end) return false;
-
-        // 品詞チェック
         if (!posSet || posSet.size === 0) return true;
 
-        return Array.isArray(word.ja) &&
-            word.ja.some(j => posSet.has(j.pos));
+        return word.ja?.some(j => {
+            // 直接一致
+            if (posSet.has(j.pos)) return true;
+            
+            // 「その他」が選択されていて、かつ前・接・助のいずれか
+            if (posSet.has("その他") && OTHER_POS.includes(j.pos)) {
+                return true;
+            }
+            
+            return false;
+        });
     });
 }
 
@@ -1179,12 +1239,16 @@ function generateRandomTestsPdf(tests) {
 
     doc.setFont("NotoSansJP-Regular", "normal");
 
+    const start = parseInt(document.getElementById("range-start").value, 10);
+    const end = parseInt(document.getElementById("range-end").value, 10);
+
+
     tests.forEach((words, index) => {
         if (index > 0) doc.addPage();
 
         // ===== 問題 =====
         doc.setFontSize(20);
-        doc.text(makeTestTitle(`${getCurrentTestLabel()}-ランダム`, options), 148, 15, { align: "center" });
+        doc.text(makeTestTitle(`${getCurrentTestLabel()}-ランダム　(範囲：${start}～${end})`, options), 148, 15, { align: "center" });
 
         doc.setFontSize(15);
         doc.text("学年：＿＿", 85, 25);
@@ -1261,19 +1325,19 @@ function getBaseWords() {
 }
 
 
-function getWordsByRangeAndPos(options) {
-    const { range, posSet } = options;
-    const baseWords = getBaseWords();
+// function getWordsByRangeAndPos(options) {
+//     const { range, posSet } = options;
+//     const baseWords = getBaseWords();
 
-    return baseWords.filter((word, index) => {
-        const wordNumber = index + 1;
+//     return baseWords.filter((word, index) => {
+//         const wordNumber = index + 1;
 
-        if (wordNumber < range.start || wordNumber > range.end) return false;
-        if (!posSet || posSet.size === 0) return true;
+//         if (wordNumber < range.start || wordNumber > range.end) return false;
+//         if (!posSet || posSet.size === 0) return true;
 
-        return word.ja?.some(j => posSet.has(j.pos));
-    });
-}
+//         return word.ja?.some(j => posSet.has(j.pos));
+//     });
+// }
 
 // 単語カード関連
 
@@ -1329,3 +1393,100 @@ document.getElementById("start-study-btn").addEventListener("click", () => {
         `&pos=${pos}` +
         `&order=${order}`;
 });
+
+
+
+
+
+// ===== メモ関連 =====
+
+const memoModal = document.getElementById("memo-modal");
+const memoTitle = document.getElementById("memo-modal-title");
+const memoTextarea = document.getElementById("memo-textarea");
+const memoSaveBtn = document.getElementById("memo-save-btn");
+const memoCloseBtn = document.getElementById("memo-close-btn");
+const memoEditBtn = document.getElementById("memo-edit-btn");
+const memoCancelBtn = document.getElementById("memo-cancel-btn");
+const memoView = document.getElementById("memo-view");
+
+memoSaveBtn.onclick = () => {
+    const value = memoTextarea.value;
+
+    wordMemos[currentMemoWordId] = value;
+    localStorage.setItem(MEMO_KEY, JSON.stringify(wordMemos));
+
+    // 表示更新
+    memoView.textContent = value || "（メモはまだありません）";
+    memoView.classList.toggle("empty", !value);
+
+    // ← ここ重要：一覧を再描画
+    renderWords();
+
+    memoView.classList.remove("modal-hidden");
+    memoTextarea.classList.add("modal-hidden");
+
+    memoEditBtn.classList.remove("modal-hidden");
+    memoSaveBtn.classList.add("modal-hidden");
+    memoCancelBtn.classList.add("modal-hidden");
+};
+
+
+
+
+function closeMemoModal() {
+    memoModal.classList.add("modal-hidden");
+    currentMemoWordId = null;
+}
+
+memoCloseBtn.onclick = closeMemoModal;
+
+memoModal.onclick = closeMemoModal;
+memoModal.querySelector(".modal-tag-content").onclick = e => {
+    e.stopPropagation();
+};
+
+memoEditBtn.onclick = () => {
+    memoView.classList.add("modal-hidden");
+    memoTextarea.classList.remove("modal-hidden");
+
+    memoTextarea.focus();
+
+    memoEditBtn.classList.add("modal-hidden");
+    memoSaveBtn.classList.remove("modal-hidden");
+    memoCancelBtn.classList.remove("modal-hidden");
+};
+
+memoEditBtn.textContent = memo ? "編集" : "新規作成";
+
+memoCancelBtn.onclick = () => {
+    memoView.classList.remove("modal-hidden");
+    memoTextarea.classList.add("modal-hidden");
+
+    memoEditBtn.classList.remove("modal-hidden");
+    memoSaveBtn.classList.add("modal-hidden");
+    memoCancelBtn.classList.add("modal-hidden");
+};
+
+
+function openMemoModal(word) {
+    currentMemoWordId = word.id;
+
+    const memo = wordMemos[word.id] ?? "";
+
+    memoTitle.textContent = `${word.en} のメモ`;
+
+    memoView.textContent = memo || "（メモはまだありません）";
+    memoView.classList.toggle("empty", !memo);
+
+    memoTextarea.value = memo;
+
+    // 閲覧モード
+    memoView.classList.remove("modal-hidden");
+    memoTextarea.classList.add("modal-hidden");
+
+    memoEditBtn.classList.remove("modal-hidden");
+    memoSaveBtn.classList.add("modal-hidden");
+    memoCancelBtn.classList.add("modal-hidden");
+
+    memoModal.classList.remove("modal-hidden");
+}

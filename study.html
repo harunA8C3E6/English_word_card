@@ -59,7 +59,7 @@
                 <div><label><input type="checkbox" value="名" checked> 名詞</label></div>
                 <div><label><input type="checkbox" value="形" checked> 形容詞</label></div>
                 <div><label><input type="checkbox" value="副" checked> 副詞</label></div>
-                <div><label><input type="checkbox" value="その他">その他</label></div>
+                <div><label><input type="checkbox" value="その他" checked> その他</label></div>
             </iv>
 
             <div class="modal-buttons">
@@ -114,8 +114,8 @@
                     <label><input type="checkbox" value="動" checked> 動詞</label>
                     <label><input type="checkbox" value="名" checked> 名詞</label>
                     <label><input type="checkbox" value="形" checked> 形容詞</label>
-                    <label><input type="checkbox" value="副" checked>副詞</label>
-                    <label><input type="checkbox" value="その他" checked>その他</label>
+                    <label><input type="checkbox" value="副" checked> 副詞</label>
+                    <label><input type="checkbox" value="その他" checked> その他</label>
                 </fieldset>
 
                 <div class="modal-buttons">
@@ -175,6 +175,34 @@
             </div>
         </div>
     </div>
+
+    <!-- メモモーダル -->
+    <div id="memo-modal" class="modal modal-hidden">
+        <div class="modal-tag-content">
+            <h3 id="memo-modal-title">メモ</h3>
+            <!-- 閲覧用 -->
+            <div id="memo-view" class="memo-view"></div>
+            <!-- 編集用 -->
+
+            <div class="modal-body">
+                <textarea
+                    id="memo-textarea"
+                    rows="6"
+                    style="width:100%;"
+                    placeholder="この単語のメモを書いてください"
+                    class="textbox"
+                ></textarea>
+            </div>
+
+            <div class="modal-buttons">
+                <button id="memo-edit-btn" class="prev-btn">編集</button>
+                <button id="memo-save-btn" class="prev-btn modal-hidden">保存</button>
+                <button id="memo-cancel-btn" class="prev-btn modal-hidden">キャンセル</button>
+                <button id="memo-close-btn" class="prev-btn">閉じる</button>
+            </div>
+        </div>
+    </div>
+
 
     <main class="container">
         <div>

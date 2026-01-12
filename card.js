@@ -11,6 +11,18 @@ let displayedIndex = 0;
 const dontKnowBtn = document.getElementById("dontknow-btn");
 const knownBtn = document.getElementById("known-btn");
 const undoBtn = document.getElementById("undo-btn");
+// ===============================
+// メモモーダル DOM取得
+// ===============================
+const memoModal = document.getElementById("memo-modal");
+const memoTitle = document.getElementById("memo-modal-title");
+const memoView = document.getElementById("memo-view");
+const memoTextarea = document.getElementById("memo-textarea");
+
+const memoEditBtn = document.getElementById("memo-edit-btn");
+const memoSaveBtn = document.getElementById("memo-save-btn");
+const memoCancelBtn = document.getElementById("memo-cancel-btn");
+
 
 console.log("card:", card);
 console.log("front:", front);
@@ -19,6 +31,15 @@ console.log("back:", back);
 card.addEventListener("click", () => {
     card.classList.toggle("flipped");
 });
+
+// ===============================
+// メモ関連（study.js と共通）
+// ===============================
+const MEMO_KEY = "wordMemos";
+let wordMemos = loadJSON(MEMO_KEY, {});
+let currentMemoWordId = null;
+
+
 // ===============================
 // URL パラメータ
 // ===============================
@@ -45,6 +66,8 @@ const POS_MAP = {
     other: "その他"
 };
 
+const OTHER_POS = ["前", "接", "助"];
+
 // ===============================
 // 出題配列の加工
 // ===============================
@@ -53,7 +76,19 @@ let filteredWords = words
     .filter(w => {
         if (posFilter.length === 0) return true;
         if (!Array.isArray(w.ja)) return true;
-        return w.ja.some(j => posFilter.some(p => POS_MAP[p] === j.pos));
+        
+        return w.ja.some(j => {
+            // 直接一致する品詞をチェック
+            const directMatch = posFilter.some(p => POS_MAP[p] === j.pos);
+            if (directMatch) return true;
+            
+            // 「その他」が選択されていて、かつ前・接・助のいずれか
+            if (posFilter.includes("other") && OTHER_POS.includes(j.pos)) {
+                return true;
+            }
+            
+            return false;
+        });
     });
 
 if (order === "random") {
@@ -83,11 +118,15 @@ function renderCard() {
     const word = words[currentIndex];
     if (!word) return;
 
+    // メモ用
+    const hasMemo = !!wordMemos[word.id]?.trim();
+
     onCard.innerHTML = `
         <div class="buttonsInCard">
             <button id="speak-btn" class="speak-btn button-text" data-word="${word.en}">🔊 再生</button>
             <button class="example-btn button-text" data-index="${currentIndex}">例文</button>
             <button class="tag-edit-btn button-text">タグ設定</button>
+            <button class="memo-btn button-text ${hasMemo ? "has-memo" : ""}">メモ</button>
         </div>
     `
 
@@ -128,7 +167,6 @@ function goNext(direction) {
     updateSwipeCounter();
 
     const isLast = currentIndex >= words.length - 1;
-
     if (isLast) {
         setTimeout(showCompleteModal, 300);
         return;
@@ -145,7 +183,8 @@ function slideOut(direction) {
     if (isAnimating) return;
     isAnimating = true;
 
-    card.classList.remove("flipped");
+    // 変更点→コメントアウト
+    // card.classList.remove("flipped");
 
     card.style.transition = "transform 0.3s ease, opacity 0.25s ease";
     card.style.transform =
@@ -155,16 +194,20 @@ function slideOut(direction) {
     card.style.opacity = "0";
 
     setTimeout(() => {
-        card.style.transition = "none";
-        card.style.transform = "";
-        card.style.opacity = "0";
 
         goNext(direction);
 
+        card.style.transition = "none";
+        card.style.transform = "";
+        card.style.opacity = "0";
+        
         requestAnimationFrame(() => {
             card.style.transition = "transform 0.3s ease, opacity 0.25s ease";
             card.style.opacity = "1"
         });
+        
+        // 変更点→追加
+        card.classList.remove("flipped");
 
         isAnimating = false;
     }, 300);
@@ -408,9 +451,6 @@ const tagCloseBtn = document.getElementById("tag-close-btn");
 
 let currentWordId = null;
 
-let wordTags = loadJSON("wordTags", {});
-let tags = loadJSON("tags", {});
-
 function loadJSON(key, defaultValue) {
     try {
         return JSON.parse(localStorage.getItem(key)) ?? defaultValue;
@@ -418,6 +458,10 @@ function loadJSON(key, defaultValue) {
         return defaultValue;
     }
 }
+
+let wordTags = loadJSON("wordTags", {});
+let tags = loadJSON("tags", {});
+
 
 // タグ編集ボタンクリック
 onCard.addEventListener("click", (e) => {
@@ -483,3 +527,95 @@ tagModal.onclick = closeTagModal;
 tagModal.querySelector(".modal-tag-content").onclick = e => {
     e.stopPropagation();
 };
+
+
+// メモ用
+onCard.addEventListener("click", (e) => {
+    const memoBtn = e.target.closest(".memo-btn");
+    if (!memoBtn) return;
+
+    e.stopPropagation();
+
+    const word = words[currentIndex];
+    if (!word) return;
+
+    openMemoModal(word);
+});
+
+function openMemoModal(word) {
+    currentMemoWordId = word.id;
+
+    const memo = wordMemos[word.id] ?? "";
+
+    memoTitle.textContent = `${word.en} のメモ`;
+
+    memoView.textContent = memo || "（メモはまだありません）";
+    memoView.classList.toggle("empty", !memo);
+
+    memoTextarea.value = memo;
+
+    // 閲覧モード
+    memoView.classList.remove("modal-hidden");
+    memoTextarea.classList.add("modal-hidden");
+
+    memoEditBtn.textContent = memo ? "編集" : "新規作成";
+    memoEditBtn.classList.remove("modal-hidden");
+    memoSaveBtn.classList.add("modal-hidden");
+    memoCancelBtn.classList.add("modal-hidden");
+
+    memoModal.classList.remove("modal-hidden");
+}
+
+memoSaveBtn.onclick = () => {
+    const value = memoTextarea.value;
+
+    wordMemos[currentMemoWordId] = value;
+    localStorage.setItem(MEMO_KEY, JSON.stringify(wordMemos));
+
+    memoView.textContent = value || "（メモはまだありません）";
+    memoView.classList.toggle("empty", !value);
+
+    // ★ カード側を更新
+    renderCard();
+
+    memoView.classList.remove("modal-hidden");
+    memoTextarea.classList.add("modal-hidden");
+
+    memoEditBtn.classList.remove("modal-hidden");
+    memoSaveBtn.classList.add("modal-hidden");
+    memoCancelBtn.classList.add("modal-hidden");
+};
+
+memoCancelBtn.onclick = () => {
+    memoView.classList.remove("modal-hidden");
+    memoTextarea.classList.add("modal-hidden");
+
+    memoEditBtn.classList.remove("modal-hidden");
+    memoSaveBtn.classList.add("modal-hidden");
+    memoCancelBtn.classList.add("modal-hidden");
+};
+
+memoEditBtn.onclick = () => {
+    memoView.classList.add("modal-hidden");
+    memoTextarea.classList.remove("modal-hidden");
+
+    memoTextarea.focus();
+
+    memoEditBtn.classList.add("modal-hidden");
+    memoSaveBtn.classList.remove("modal-hidden");
+    memoCancelBtn.classList.remove("modal-hidden");
+};
+
+memoModal.onclick = closeMemoModal;
+memoModal.querySelector(".modal-tag-content").onclick = e => {
+    e.stopPropagation();
+};
+
+const memoCloseBtn = document.getElementById("memo-close-btn");
+
+memoCloseBtn.onclick = closeMemoModal;
+
+function closeMemoModal() {
+    memoModal.classList.add("modal-hidden");
+    currentMemoWordId = null;
+}
