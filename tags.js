@@ -1,9 +1,6 @@
-document.getElementById("back-btn").onclick = () => {
-    location.href = "index.html";
-};
-
-
-// 初期化用コード
+// ==============================
+// loadJSONの定義
+// ==============================
 function loadJSON(key, defaultValue) {
     try {
         return JSON.parse(localStorage.getItem(key)) ?? defaultValue;
@@ -12,6 +9,9 @@ function loadJSON(key, defaultValue) {
     }
 }
 
+// ==============================
+// tagsの読み込み（今くいかなければ初期値）
+// ==============================
 const tags = loadJSON("tags", {
     タグ1 : { name: "タグ1" },
     タグ2 : { name: "タグ2" },
@@ -65,20 +65,17 @@ const tags = loadJSON("tags", {
     タグ50: { name: "タグ50" }
 });
 
+// ==============================
+// tagsの保存
+// ==============================
 localStorage.setItem("tags", JSON.stringify(tags));
-// 初期化用コード終了
 
-// localStorage から取得
-// const tags = JSON.parse(localStorage.getItem("tags")) ?? {};
 const wordTags = JSON.parse(localStorage.getItem("wordTags")) ?? {};
-
 const tagListEl = document.getElementById("tag-list");
 
-console.log("tags:", tags);
-console.log("wordTags:", wordTags);
-console.log("tagListEl:", tagListEl);
-
+// ==============================
 // タグごとの単語数を数える
+// ==============================
 function countWordsByTag(tagId) {
     let count = 0;
     
@@ -91,7 +88,9 @@ function countWordsByTag(tagId) {
     return count;
 }
 
-// 描画
+// ==============================
+// タグごとにボタンの生成
+// ==============================
 Object.entries(tags).forEach(([tagId, tag]) => {
     const li = document.createElement("li");
     li.className = "tag-item";
@@ -108,10 +107,23 @@ Object.entries(tags).forEach(([tagId, tag]) => {
     tagListEl.appendChild(li);
 });
 
+// ==============================
+// 「←」「← ホームに戻る」ボタン
+// ==============================
+document.getElementById("back-btn").onclick = () => {
+    location.href = "index.html";
+};
+document.getElementById("prev-page-btn").onclick = () => {
+    location.href = "index.html";
+};
+
+// ==============================
+// タグの初期化ボタン（基本はコメントアウト）
+// ==============================
 // document.getElementById("tag-restart").onclick = () => {
 //     if (!confirm("タグを初期化します。よろしいですか？")) return;
 //     const tags = {};
-
+    
 //     for (let i = 1; i <= 50; i++) {
 //         tags[`タグ${i}`] = { name: `タグ${i}` };
 //     }
@@ -120,13 +132,3 @@ Object.entries(tags).forEach(([tagId, tag]) => {
 
 //     alert("タグを初期化しました");
 // };
-
-// ===== 1つ前のページに戻るボタン =====
-// const prevBtn = document.getElementById("prev-page-btn");
-// prevBtn.onclick = () => {
-//     location.href = "index.html"
-// };
-
-document.getElementById("prev-page-btn").onclick = () => {
-    location.href = "index.html";
-};
