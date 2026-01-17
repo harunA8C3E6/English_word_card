@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReChool</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+<header class="header">
+    <button id="prev-page-btn" class="prev-page-btn">←</button>
+    <h1>タグ一覧</h1>
+</header>
+<main class="container">
+    <button class="tag-rename-button" onclick="location.href='tag-edit.html'">
+        タグ名を編集
+    </button>
+    <ul id="tag-list" class="tag-list"></ul>
+    <button id="back-btn">← ホームに戻る</button>
+    <!-- タグの初期化用のボタン -->
+    <!-- <button id="tag-restart" class="button-text">タグの初期化</button> -->
+</main>
+<script src="../data.js"></script>
+<script src="./tags.js"></script>
+</body>
+
+</html>

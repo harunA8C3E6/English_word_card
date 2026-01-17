@@ -268,6 +268,22 @@ h2 {
     margin-bottom: 12px;
 }
 
+#jump-btn {
+    font-size: 12px;
+}
+#word-search-btn {
+    font-size: 12px;
+}
+#pos-filter-btn {
+    font-size: 12px;
+}
+#open-test-modal-btn {
+    font-size: 12px;
+}
+#open-card-setting {
+    font-size: 12px;
+}
+
 .controls button {
     padding: 10px 15px;
     background: #2a2a2a;
@@ -411,7 +427,7 @@ h2 {
     padding-right: 5px;
     padding-bottom: 3px;
     border-radius: 8px;
-    margin-left: 16px;
+    margin-top: 14px;
     font-size: 1.1rem;
     cursor: pointer;
     user-select: none;

@@ -13,10 +13,34 @@ const wordBooks = [
         abbr: "数理科学用語"
     }
 ];
+const modernWordBooks = [
+    {
+        id: "keywordReadingComprehension",
+        title: "キーワード読解",
+        description: "キーワード読解の用語を掲載",
+        abbr: "キーワード読解" // テストPDFに表示される名前
+    }
+];
+const classicalWordBooks = [
+    {
+        id: "classicalJapaneseWord315",
+        title: "古文単語315",
+        description: "古文単語315の単語を掲載",
+        abbr: "古文単語315" // テストPDFに表示される名前
+    }
+];
 
 // id → 単語帳データ を引けるMap
 const wordBookMap = {};
 wordBooks.forEach(book => {
+    wordBookMap[book.id] = book;
+});
+const modernWordBookMap = {};
+modernWordBooks.forEach(book => {
+    wordBookMap[book.id] = book;
+});
+const classicalWordBookMap = {};
+classicalWordBooks.forEach(book => {
     wordBookMap[book.id] = book;
 });
 
@@ -2119,3 +2143,65 @@ tags = {
 };
 
 wordTags = {};
+
+modernWordData = {
+    keywordReadingComprehension: [
+        {id: "KRC1", ja: "抽象", meanset: [ {act: "活用", mean: "抽象的なこと"} ], theme: "一般"}
+    ]
+};
+
+classicalWordData = {
+    classicalJapaneseWord315: [
+        {id: "CJW1", ja: "古文単語1", meanset: [ {pos: "動", mean: "意味1"}, {pos: "動", mean:"古典単語1-2"} ], example: {en: "例文1", ja: "例文現代語訳1"} },
+        {id: "CJW2", ja: "古文単語2", meanset: [ {pos: "形", mean: "意味2"} ], example: {en: "例文2", ja: "例文現代語訳2"} },
+        {id: "CJW3", ja: "古文単語3", meanset: [ {pos: "形動", mean: "意味3"} ], example: {en: "例文3", ja: "例文現代語訳3"} },
+        {id: "CJW4", ja: "古文単語4", meanset: [ {pos: "名", mean: "意味4"} ], example: {en: "例文4", ja: "例文現代語訳4"} },
+        {id: "CJW5", ja: "古文単語5", meanset: [ {pos: "副", mean: "意味5"} ], example: {en: "例文5", ja: "例文現代語訳5"} },
+        {id: "CJW6", ja: "古文単語6", meanset: [ {pos: "動", mean: "意味6"} ], example: {en: "例文6", ja: "例文現代語訳6"} },
+        {id: "CJW7", ja: "古文単語7", meanset: [ {pos: "形", mean: "意味7"} ], example: {en: "例文7", ja: "例文現代語訳7"} },
+        {id: "CJW8", ja: "古文単語8", meanset: [ {pos: "形動", mean: "意味8"} ], example: {en: "例文8", ja: "例文現代語訳8"} },
+        {id: "CJW9", ja: "古文単語9", meanset: [ {pos: "名", mean: "意味9"} ], example: {en: "例文9", ja: "例文現代語訳9"} },
+        {id: "CJW10", ja: "古文単語10", meanset: [ {pos: "副", mean: "意味10"} ], example: {en: "例文10", ja: "例文現代語訳10"} },
+        {id: "CJW11", ja: "古文単語11", meanset: [ {pos: "動", mean: "意味11"} ], example: {en: "例文11", ja: "例文現代語訳11"} },
+        {id: "CJW11", ja: "古文単語12", meanset: [ {pos: "動", mean: "意味12"} ], example: {en: "例文12", ja: "例文現代語訳11"} },
+        {id: "CJW11", ja: "古文単語13", meanset: [ {pos: "動", mean: "意味13"} ], example: {en: "例文13", ja: "例文現代語訳11"} },
+        {id: "CJW11", ja: "古文単語14", meanset: [ {pos: "動", mean: "意味14"} ], example: {en: "例文11", ja: "例文現代語訳11"} },
+        {id: "CJW11", ja: "古文単語15", meanset: [ {pos: "動", mean: "意味15"} ], example: {en: "例文11", ja: "例文現代語訳11"} },
+        {id: "CJW11", ja: "古文単語16", meanset: [ {pos: "動", mean: "意味16"} ], example: {en: "例文11", ja: "例文現代語訳11"} },
+        {id: "CJW11", ja: "古文単語17", meanset: [ {pos: "動", mean: "意味17"} ], example: {en: "例文11", ja: "例文現代語訳11"} },
+        {id: "CJW11", ja: "古文単語18", meanset: [ {pos: "動", mean: "意味18"} ], example: {en: "例文11", ja: "例文現代語訳11"} },
+        {id: "CJW11", ja: "古文単語19", meanset: [ {pos: "動", mean: "意味19"} ], example: {en: "例文11", ja: "例文現代語訳11"} },
+        {id: "CJW11", ja: "古文単語20", meanset: [ {pos: "動", mean: "意味20"} ], example: {en: "例文11", ja: "例文現代語訳11"} },
+        {id: "CJW1", ja: "古文単語21", meanset: [ {pos: "動", mean: "意味21"} ], example: {en: "例文1", ja: "例文現代語訳1"} },
+        {id: "CJW2", ja: "古文単語22", meanset: [ {pos: "形", mean: "意味22"} ], example: {en: "例文2", ja: "例文現代語訳2"} },
+        {id: "CJW3", ja: "古文単語23", meanset: [ {pos: "形動", mean: "意味23"} ], example: {en: "例文3", ja: "例文現代語訳3"} },
+        {id: "CJW4", ja: "古文単語24", meanset: [ {pos: "名", mean: "意味24"} ], example: {en: "例文4", ja: "例文現代語訳4"} },
+        {id: "CJW5", ja: "古文単語25", meanset: [ {pos: "副", mean: "意味25"} ], example: {en: "例文5", ja: "例文現代語訳5"} },
+        {id: "CJW6", ja: "古文単語26", meanset: [ {pos: "動", mean: "意味26"} ], example: {en: "例文6", ja: "例文現代語訳6"} },
+        {id: "CJW7", ja: "古文単語27", meanset: [ {pos: "形", mean: "意味27"} ], example: {en: "例文7", ja: "例文現代語訳7"} },
+        {id: "CJW8", ja: "古文単語28", meanset: [ {pos: "形動", mean: "意味28"} ], example: {en: "例文8", ja: "例文現代語訳8"} },
+        {id: "CJW9", ja: "古文単語29", meanset: [ {pos: "名", mean: "意味29"} ], example: {en: "例文9", ja: "例文現代語訳9"} },
+        {id: "CJW9", ja: "古文単語30", meanset: [ {pos: "名", mean: "意味30"} ], example: {en: "例文9", ja: "例文現代語訳9"} },
+        {id: "CJW1", ja: "古文単語31", meanset: [ {pos: "動", mean: "意味31"} ], example: {en: "例文1", ja: "例文現代語訳1"} },
+        {id: "CJW2", ja: "古文単語32", meanset: [ {pos: "形", mean: "意味32"} ], example: {en: "例文2", ja: "例文現代語訳2"} },
+        {id: "CJW3", ja: "古文単語33", meanset: [ {pos: "形動", mean: "意味33"} ], example: {en: "例文3", ja: "例文現代語訳3"} },
+        {id: "CJW4", ja: "古文単語34", meanset: [ {pos: "名", mean: "意味34"} ], example: {en: "例文4", ja: "例文現代語訳4"} },
+        {id: "CJW5", ja: "古文単語35", meanset: [ {pos: "副", mean: "意味35"} ], example: {en: "例文5", ja: "例文現代語訳5"} },
+        {id: "CJW6", ja: "古文単語36", meanset: [ {pos: "動", mean: "意味36"} ], example: {en: "例文6", ja: "例文現代語訳6"} },
+        {id: "CJW7", ja: "古文単語37", meanset: [ {pos: "形", mean: "意味37"} ], example: {en: "例文7", ja: "例文現代語訳7"} },
+        {id: "CJW8", ja: "古文単語38", meanset: [ {pos: "形動", mean: "意味38"} ], example: {en: "例文8", ja: "例文現代語訳8"} },
+        {id: "CJW9", ja: "古文単語39", meanset: [ {pos: "名", mean: "意味39"} ], example: {en: "例文9", ja: "例文現代語訳9"} },
+        {id: "CJW9", ja: "古文単語40", meanset: [ {pos: "名", mean: "意味40"} ], example: {en: "例文9", ja: "例文現代語訳9"} },
+        {id: "CJW1", ja: "古文単語41", meanset: [ {pos: "動", mean: "意味41"} ], example: {en: "例文1", ja: "例文現代語訳1"} },
+        {id: "CJW2", ja: "古文単語42", meanset: [ {pos: "形", mean: "意味42"} ], example: {en: "例文2", ja: "例文現代語訳2"} },
+        {id: "CJW3", ja: "古文単語43", meanset: [ {pos: "形動", mean: "意味43"} ], example: {en: "例文3", ja: "例文現代語訳3"} },
+        {id: "CJW4", ja: "古文単語44", meanset: [ {pos: "名", mean: "意味44"} ], example: {en: "例文4", ja: "例文現代語訳4"} },
+        {id: "CJW5", ja: "古文単語45", meanset: [ {pos: "副", mean: "意味45"} ], example: {en: "例文5", ja: "例文現代語訳5"} },
+        {id: "CJW6", ja: "古文単語46", meanset: [ {pos: "動", mean: "意味46"} ], example: {en: "例文6", ja: "例文現代語訳6"} },
+        {id: "CJW7", ja: "古文単語47", meanset: [ {pos: "形", mean: "意味47"} ], example: {en: "例文7", ja: "例文現代語訳7"} },
+        {id: "CJW8", ja: "古文単語48", meanset: [ {pos: "形動", mean: "意味48"} ], example: {en: "例文8", ja: "例文現代語訳8"} },
+        {id: "CJW9", ja: "古文単語49", meanset: [ {pos: "名", mean: "意味49"} ], example: {en: "例文9", ja: "例文現代語訳9"} },
+        {id: "CJW10", ja: "古文単語50", meanset: [ {pos: "副", mean: "意味50"} ], example: {en: "例文10", ja: "例文現代語訳10"} },
+        {id: "CJW10", ja: "古文単語51", meanset: [ {pos: "副", mean: "意味51s"} ], example: {en: "例文10", ja: "例文現代語訳10"} },
+    ]
+}
