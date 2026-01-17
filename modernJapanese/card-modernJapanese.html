@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>ReChool</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+<header class="header">
+    <button onclick="history.back()" class="prev-page-btn">←</button>
+    <h1>カード学習</h1>
+</header>
+
+<!-- 結果表示モーダル -->
+<div id="complete-modal" class="modal modal-hidden">
+    <div class="modal-tag-content">
+        <h2>学習完了 🎉</h2>
+
+        <div class="modal-body">
+            <div class="center"><canvas id="result-chart" width="200" height="200"></canvas></div>
+            <p>総単語数：<span id="total-count"></span></p>
+            <!-- <div id="swipe-counter2"> -->
+            <p class="known">覚えた：<span id="known-count"></span></p>
+            <p class="review">要復習：<span id="review-count"></span></p>
+            <!-- </div> -->
+
+            <button id="restart-review" class="button-text">要復習のみ再学習</button>
+            <button id="result-close" class="button-text">戻る</button>
+        </div>
+    </div>
+</div>
+
+<!-- 例文ポップアップ -->
+    <div id="example-modal" class="modal modal-hidden">
+        <div class="modal-content">
+            <button id="close-modal">×</button>
+            <p class="example-en"></p>
+        <p class="example-ja modal-hidden"></p>
+        </div>
+    </div>
+<!-- タグ設定モーダル -->
+<div id="tag-modal" class="modal modal-hidden">
+    <div class="modal-tag-content">
+        <h3 id="tag-modal-title"></h3>
+
+        <!-- ★ ここをスクロールさせる -->
+        <div class="modal-body" id="tag-checkbox-area"></div>
+
+        <div class="modal-buttons">
+            <button id="tag-save-btn" class="prev-btn">保存</button>
+            <button id="tag-close-btn" class="prev-btn">閉じる</button>
+        </div>
+    </div>
+</div>
+<!-- メモモーダル -->
+<div id="memo-modal" class="modal modal-hidden">
+    <div class="modal-tag-content">
+        <h3 id="memo-modal-title">メモ</h3>
+        <!-- 閲覧用 -->
+        <div id="memo-view" class="memo-view"></div>
+        <!-- 編集用 -->
+
+        <div class="modal-body">
+            <textarea
+                id="memo-textarea"
+                rows="6"
+                style="width:100%;"
+                placeholder="この単語のメモを書いてください"
+                class="textbox"
+            ></textarea>
+        </div>
+
+        <div class="modal-buttons">
+            <button id="memo-edit-btn" class="prev-btn">編集</button>
+            <button id="memo-save-btn" class="prev-btn modal-hidden">保存</button>
+            <button id="memo-cancel-btn" class="prev-btn modal-hidden">キャンセル</button>
+            <button id="memo-close-btn" class="prev-btn">閉じる</button>
+        </div>
+    </div>
+</div>
+
+<main class="container">
+    <div class="progress-bar-div"><progress id="progress-bar" value="1" max="20"></progress></div>
+    <div id="progress-text">
+        <span id="current-index">1</span> /
+        <span id="total-count-card">0</span>
+    </div>
+    
+    <div id="swipe-counter">
+        <span class="review">要復習：<span id="review-count-live">0</span></span>
+        <span class="known">覚えた：<span id="known-count-live">0</span></span>
+    </div>
+
+    <div class="card-container">
+        <div id="soundEtc"></div>
+        <div id="card" class="card">
+            <div class="card-face card-front" id="card-front">
+            </div>
+            <div class="card-face card-back" id="card-back">
+            </div>
+        </div>
+    </div>
+
+    <div class="know-dontknow-btn">
+        <button id="dontknow-btn" class="bigBtn">← 要復習</button>
+        <button id="known-btn" class="bigBtn">覚えた →</button>
+    </div>
+
+    <!-- <button id="flip-btn" class="button-text"></button> -->
+
+    <!-- デバッグ用 -->
+    <!-- <div class="debug-buttons">
+        <button id="next-btn-left">←</button>
+        <button id="next-btn-right">→</button>
+    </div> -->
+
+    <button id="undo-btn" class="prev-btn">1つ前に戻る</button>
+
+
+</main>
+
+<script src="../data.js"></script>
+<script src="./card-modernJapanese.js"></script>
+</body>
+</html>

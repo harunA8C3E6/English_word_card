@@ -387,6 +387,11 @@ h2 {
     margin-bottom: 12px;
 }
 
+.tag-rename-item {
+    display: flex;
+    margin-bottom: 12px;
+}
+
 .tag-link {
     display: flex;
     align-items: center;
@@ -402,12 +407,26 @@ h2 {
     background: #2a2a2a;
 }
 
+.tag-rename-id {
+    display: inline-block;
+    align-self: center;
+    /* flex: 0 0 clamp(220px, 35%, 420px); */
+    font-size: 1rem;
+    padding-right: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* width: 20px; */
+    max-width: 99%;
+}
+
 .tag-name {
-    flex: 1;                 /* ← 残り全部使う */
+    flex: 1; /* ← 残り全部使う */
     font-size: 1rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    /* width: 20px; */
     max-width: 99%;
 }
 
@@ -473,11 +492,6 @@ h2 {
     color: #222;
     font-size: 1rem;
     line-height: 1.5;
-}
-/* タグ名編集画面のタグIDのテキスト */
-.tag-name {
-    display: inline-block;
-    width: 60px;
 }
 
 #tag-save-btn {

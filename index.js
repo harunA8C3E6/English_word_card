@@ -37,9 +37,9 @@ modernWordBooks.forEach(book => {
         <div class="wordbook-desc">用語数：${wordCount}</div>
     `;
 
-    // card.addEventListener("click", () => {
-    //     location.href = `study-modernJapanese.html?book=${book.id}`;
-    // });
+    card.addEventListener("click", () => {
+        location.href = `modernJapanese/study-modernJapanese.html?book=${book.id}`;
+    });
 
     modernListEl.appendChild(card);
 });

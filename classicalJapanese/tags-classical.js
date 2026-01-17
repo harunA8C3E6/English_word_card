@@ -70,7 +70,7 @@ const tags = loadJSON("tags-classical", {
 // ==============================
 localStorage.setItem("tags-classical", JSON.stringify(tags));
 
-const wordTags = JSON.parse(localStorage.getItem("wordTags")) ?? {};
+const wordTags = JSON.parse(localStorage.getItem("wordTags-classical")) ?? {};
 const tagListEl = document.getElementById("tag-list");
 
 // ==============================
@@ -120,15 +120,15 @@ document.getElementById("prev-page-btn").onclick = () => {
 // ==============================
 // タグの初期化ボタン（基本はコメントアウト）
 // ==============================
-document.getElementById("tag-restart").onclick = () => {
-    if (!confirm("タグを初期化します。よろしいですか？")) return;
-    const tags = {};
+// document.getElementById("tag-restart").onclick = () => {
+//     if (!confirm("タグを初期化します。よろしいですか？")) return;
+//     const tags = {};
     
-    for (let i = 1; i <= 50; i++) {
-        tags[`古典タグ${i}`] = { name: `古典タグ${i}` };
-    }
+//     for (let i = 1; i <= 50; i++) {
+//         tags[`古典タグ${i}`] = { name: `古典タグ${i}` };
+//     }
 
-    localStorage.setItem("tags-classical", JSON.stringify(tags));
+//     localStorage.setItem("tags-classical", JSON.stringify(tags));
 
-    alert("タグを初期化しました");
-};
+//     alert("タグを初期化しました");
+// };

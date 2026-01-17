@@ -2,7 +2,7 @@
 // DOM取得
 // ==============================
 const tagListEl = document.getElementById("tag-edit-list");
-const tags = JSON.parse(localStorage.getItem("tags")) ?? {};
+const tags = JSON.parse(localStorage.getItem("tags-modern")) ?? {};
 
 // ==============================
 // タグごとにテキストボックスの生成
@@ -21,7 +21,7 @@ Object.entries(tags).forEach(([tagId, tag]) => {
     // 名前が変更された際にローカルストレージも変更
     input.onchange = () => {
         tags[tagId].name = input.value.trim() || tagId;
-        localStorage.setItem("tags", JSON.stringify(tags));
+        localStorage.setItem("tags-modern", JSON.stringify(tags));
     };
     
     tagListEl.appendChild(li);
@@ -31,8 +31,8 @@ Object.entries(tags).forEach(([tagId, tag]) => {
 // 「←」「← ホームに戻る」ボタン
 // ==============================
 document.getElementById("back-btn").onclick = () => {
-    location.href = "./tags.html";
+    location.href = "./tags-modern.html";
 };
 document.getElementById("prev-page-btn").onclick = () => {
-    location.href = "./tags.html";
+    location.href = "./tags-modern.html";
 };
