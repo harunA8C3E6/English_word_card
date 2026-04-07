@@ -156,7 +156,7 @@ function renderCard() {
 
     front.textContent = word.ja
 
-    if (Array.isArray(word.ja)) {
+    if (Array.isArray(word.meanset)) {
         back.innerHTML = word.meanset
             .map(m => `${m.pos}：${m.mean}`)
             .join("<br>");
