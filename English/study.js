@@ -980,7 +980,8 @@ function generateMultipleTestsPDF(allWords, options) {
         doc.text("英単語テスト（50問）", 45, 23, { align: "center" });
         
         doc.setFontSize(15);
-        doc.text("学年：＿＿", 85, 23);
+        doc.text("学年：＿＿", 50, 23);
+        doc.text("クラス：＿＿",80, 23);
         doc.text("番号：＿＿", 115, 23);
         doc.text("名前：＿＿＿＿＿＿＿＿", 145, 23);
         
@@ -1111,7 +1112,8 @@ function generateCombinedTestPdf(words) {
         doc.text(makeSequentialTestTitle(`${getCurrentTestLabel()}-連番`, options, index, chunk.length),148, 15, { align: "center" });
 
         doc.setFontSize(15);
-        doc.text("学年：＿＿", 85, 25);
+        doc.text("学年：＿＿", 50, 25);
+        doc.text("クラス：＿＿",80, 25);
         doc.text("番号：＿＿", 115, 25);
         doc.text("名前：＿＿＿＿＿＿＿＿", 145, 25);
         
@@ -1155,7 +1157,8 @@ function generateRandomTestsPdf(tests) {
         doc.text(makeTestTitle(`${getCurrentTestLabel()}-ランダム　(範囲：${start}～${end})`, options), 148, 15, { align: "center" });
         
         doc.setFontSize(15);
-        doc.text("学年：＿＿", 85, 25);
+        doc.text("学年：＿＿", 50, 25);
+        doc.text("クラス：＿＿",80, 25);
         doc.text("番号：＿＿", 115, 25);
         doc.text("名前：＿＿＿＿＿＿＿＿", 145, 25);
         doc.text("得点：＿＿＿ / 50", 220, 25);
@@ -1259,26 +1262,38 @@ closeBtn.addEventListener("click", () => {
     //     location.href = `card.html?book=${book}`;
     // };
     
-    document.getElementById("start-study-btn").addEventListener("click", () => {
-        const params = new URLSearchParams(location.search);
+document.getElementById("start-study-btn").addEventListener("click", () => {
+    const params = new URLSearchParams(location.search);
+
     const book = params.get("book");
-    
+    const tag = params.get("tag");   // ←追加
+
     const from = document.getElementById("range-from").value;
     const to = document.getElementById("range-to").value;
     const limit = document.getElementById("limit-count").value;
     const order = document.getElementById("order-type").value;
-    
+
     const pos = [...document.querySelectorAll(
         'fieldset input[type="checkbox"]:checked'
     )].map(cb => cb.value).join(",");
-    
-    location.href =
-    `card.html?book=${book}` +
-    `&from=${from}` +
-    `&to=${to}` +
-    `&limit=${limit}` +
-    `&pos=${pos}` +
-    `&order=${order}`;
+
+    // ベースURL
+    let url =
+        `card.html?` +
+        `from=${from}` +
+        `&to=${to}` +
+        `&limit=${limit}` +
+        `&pos=${pos}` +
+        `&order=${order}`;
+
+    // 条件で分岐
+    if (tag) {
+        url += `&tag=${tag}`;
+    } else {
+        url += `&book=${book}`;
+    }
+
+    location.href = url;
 });
 
 

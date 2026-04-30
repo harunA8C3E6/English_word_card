@@ -23,11 +23,6 @@ const memoEditBtn = document.getElementById("memo-edit-btn");
 const memoSaveBtn = document.getElementById("memo-save-btn");
 const memoCancelBtn = document.getElementById("memo-cancel-btn");
 
-
-console.log("card:", card);
-console.log("front:", front);
-console.log("back:", back);
-
 card.addEventListener("click", () => {
     card.classList.toggle("flipped");
 });
@@ -45,6 +40,7 @@ let currentMemoWordId = null;
 // ===============================
 const params = new URLSearchParams(location.search);
 const bookId = params.get("book");
+const tagId = params.get("tag");
 
 const from = Number(params.get("from") ?? 1);
 const to = Number(params.get("to"));
@@ -56,7 +52,36 @@ const posFilter = rawPos ? rawPos.split(",") : [];
 // ===============================
 // 単語データ取得
 // ===============================
-let words = wordData[bookId] ?? [];
+let words = [];
+
+function loadJSON(key, defaultValue) {
+    try {
+        return JSON.parse(localStorage.getItem(key)) ?? defaultValue;
+    } catch {
+        return defaultValue;
+    }
+}
+
+let wordTags = loadJSON("wordTags", {});
+let tags = loadJSON("tags", {});
+
+if (tagId) {
+    // ===============================
+    // タグ学習モード
+    // ===============================
+    const allWords = Object.values(wordData).flat();
+
+    words = allWords.filter(w => {
+        const tagsForWord = wordTags[w.id] ?? [];
+        return tagsForWord.includes(tagId);
+    });
+
+} else if (bookId) {
+    // ===============================
+    // 通常モード
+    // ===============================
+    words = wordData[bookId] ?? [];
+}
 
 const POS_MAP = {
     verb: "動",
@@ -68,6 +93,9 @@ const POS_MAP = {
 
 const OTHER_POS = ["前", "接", "助"];
 
+// ===============================
+// 出題配列の加工
+// ===============================
 // ===============================
 // 出題配列の加工
 // ===============================
@@ -451,16 +479,7 @@ const tagCloseBtn = document.getElementById("tag-close-btn");
 
 let currentWordId = null;
 
-function loadJSON(key, defaultValue) {
-    try {
-        return JSON.parse(localStorage.getItem(key)) ?? defaultValue;
-    } catch {
-        return defaultValue;
-    }
-}
 
-let wordTags = loadJSON("wordTags", {});
-let tags = loadJSON("tags", {});
 
 
 // タグ編集ボタンクリック
